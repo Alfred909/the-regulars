@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>The Regulars</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +35,11 @@ body.bt #vig{opacity:1}
 .street{font-family:var(--display);font-size:20px;letter-spacing:.02em;color:var(--amber)}
 .street small{font-family:var(--han);font-size:18px;color:var(--sign-red);margin-left:8px;-webkit-text-stroke:.5px var(--ink)}
 .clock{font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
+.obj{margin-top:6px;font-size:17px;font-weight:700;color:var(--amber);max-width:340px;line-height:1.2}
+.obj:before{content:"▸ ";color:var(--paper)}
+#sneakTag{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);font-family:var(--hud);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--jade);opacity:0;pointer-events:none;transition:opacity .2s}
+body.sneak #sneakTag{opacity:1}
+body.sneak #vig{opacity:.55}
 .label{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
 .bar{height:9px;background:rgba(11,7,16,.75);border:2px solid var(--ink);margin:3px 0 9px;position:relative;overflow:hidden}
 .bar>i{position:absolute;inset:0 auto 0 0;width:50%;display:block}
@@ -49,6 +53,19 @@ body.bt #vig{opacity:1}
 .weap{font-family:var(--display);font-size:26px;color:var(--paper)}
 .ammo{font-size:30px;font-variant-numeric:tabular-nums;color:var(--amber)}
 .loadout{font-size:15px;color:var(--muted);line-height:1.35}
+#scope{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .12s;background:radial-gradient(circle at 50% 50%,transparent 0,transparent 31vh,rgba(5,3,8,.96) 31.4vh)}
+#scope.on{opacity:1}
+#scope:before,#scope:after{content:"";position:absolute;left:50%;top:50%;background:rgba(10,6,14,.9)}
+#scope:before{width:1.5px;height:62vh;transform:translate(-50%,-50%)}
+#scope:after{height:1.5px;width:62vh;transform:translate(-50%,-50%)}
+body.scoped #xh{opacity:0}
+#xh.ads{transform:scale(.6)}
+#wstrip{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);display:flex;gap:6px;pointer-events:none;opacity:0;transition:opacity .25s}
+#wstrip.on{opacity:1;transition:opacity .05s}
+#wstrip div{font-family:var(--hud);font-weight:700;font-size:16px;padding:5px 12px;background:rgba(11,7,16,.72);color:var(--muted);border:2px solid rgba(255,255,255,.08);letter-spacing:.04em}
+#wstrip div b{color:var(--paper);margin-right:6px}
+#wstrip div.cur{color:var(--ink);background:var(--amber);border-color:var(--amber)}
+#wstrip div.cur b{color:var(--ink)}
 .loadout b{color:var(--paper)}
 .loadout .cur{color:var(--amber)}
 #wtb{height:9px;background:rgba(11,7,16,.75);border:2px solid var(--ink);margin:4px 0 0 auto;width:220px;position:relative}
@@ -66,7 +83,7 @@ body.bt #vig{opacity:1}
 #feed div{font-size:19px;padding:3px 12px;background:rgba(11,7,16,.72);border-left:3px solid var(--amber);transition:opacity .6s}
 #feed div.bad{border-color:var(--heat)}
 #feed div.good{border-color:var(--jade)}
-#mini{position:fixed;right:calc(14px + env(safe-area-inset-right,0px));top:calc(112px + env(safe-area-inset-top,0px));width:176px;height:132px;border:2px solid var(--ink);opacity:.92;pointer-events:none}
+#mini{position:fixed;right:calc(14px + env(safe-area-inset-right,0px));top:calc(112px + env(safe-area-inset-top,0px));width:176px;height:186px;border:2px solid var(--ink);opacity:.92;pointer-events:none}
 .ov{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 30% 20%,rgba(212,32,47,.18),transparent 55%),rgba(11,7,16,.82);padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));overflow:auto}
 .card{max-width:760px;width:100%;display:grid;grid-template-columns:92px 1fr;gap:26px;align-items:start}
 .banner{background:var(--sign-red);border:4px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:14px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--han);font-size:52px;line-height:1.05;color:var(--amber);-webkit-text-stroke:2px var(--ink)}
@@ -86,14 +103,15 @@ button.go:disabled{background:#6b5d78;cursor:wait}
 </style>
 
 <canvas id="c" aria-label="The Regulars game view"></canvas>
-<div id="vig"></div><div id="hurt"></div>
-<div class="hud" id="tl"><div class="street">Gai Fong Street<small>街坊</small></div><div class="clock" id="clock">19:00 · Living block</div></div>
+<div id="vig"></div><div id="hurt"></div><div id="scope"></div>
+<div class="hud" id="tl"><div class="street">Gai Fong Street<small>街坊</small></div><div class="clock" id="clock">19:00 · Living block</div><div class="obj" id="obj"></div></div>
+<div id="sneakTag">Sneaking · Z to stand</div>
 <div class="hud" id="tr">
   <div class="label"><span>Dominance</span><span id="domn">0 / 100</span></div>
   <div class="bar" id="domb"><i></i></div>
   <div class="label" style="justify-content:flex-end"><span>Heat&nbsp;</span><span class="heat" id="heat"></span></div>
 </div>
-<canvas id="mini" width="176" height="132"></canvas>
+<canvas id="mini" width="176" height="186"></canvas>
 <div class="hud" id="bl">
   <div class="label"><span>Health</span><span id="hpn">100</span></div><div class="bar" id="hpb"><i></i></div>
   <div class="label"><span>Stunts</span><span id="stn">C or middle click</span></div><div class="bar" id="stb"><i></i></div>
@@ -108,6 +126,7 @@ button.go:disabled{background:#6b5d78;cursor:wait}
 </div>
 <div id="xh"></div>
 <div id="target" class="hud"></div>
+<div id="wstrip"></div>
 <div id="feed"></div>
 <div id="lockhint" hidden>Mouse lock is off here: hold the right mouse button and drag to look, or use the arrow keys.</div>
 
@@ -116,17 +135,19 @@ button.go:disabled{background:#6b5d78;cursor:wait}
     <div class="banner" aria-hidden="true"><span>街</span><span>坊</span></div>
     <div>
       <h1>The Regulars</h1>
-      <p class="lede">Everyone on Gai Fong Street has somewhere to be: noodles at the stall, a browse at the pawn shop, home before ten. Three of the regulars are here for you. Find them before they find you, clear the Ma out of the warehouse yard, and keep your hands clean of everyone else.</p>
+      <p class="lede">Everyone on Gai Fong Street has somewhere to be: noodles at the stall, a browse at the pawn shop, home before ten. Three of the regulars are here for you. Find them before they find you, then slip into Yaki's godowns. Stay out of sight, lift the stair key from the breakroom, and take Yaki down on the roof. Keep your hands clean of everyone else.</p>
       <p class="tell">Watch for the glint. A hitman's glasses catch the light when he's watching your back.</p>
       <div class="keys">
         <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>Move</div>
         <div><kbd>Mouse</kbd>Look and aim</div>
         <div><kbd>Click</kbd>Shoot or punch</div>
+        <div><kbd>Right mouse</kbd>Aim / zoom (scopes zoom further)</div>
         <div><kbd>Space</kbd>Jump</div>
         <div><kbd>C</kbd><kbd>Middle click</kbd>Dive in any direction</div>
         <div><kbd>Shift</kbd>Run</div>
+        <div><kbd>Z</kbd>Sneak (quiet, low, harder to spot)</div>
         <div><kbd>Q</kbd>Bullet time</div>
-        <div><kbd>1</kbd>–<kbd>4</kbd>Switch weapon</div>
+        <div><kbd>1</kbd>–<kbd>5</kbd><kbd>Wheel</kbd>Switch weapon</div>
         <div><kbd>R</kbd>Reload</div>
         <div><kbd>G</kbd>Drop weapon (lighter, more stunts)</div>
         <div><kbd>M</kbd>Mute</div>
@@ -390,7 +411,7 @@ function buildWorld() {
   const pave = noiseTex('#6f6879', ['#5a5466', '#837c8f'], 256, true);
   const brick = noiseTex('#8a3f3c', ['#6d2f2d', '#a4544f'], 256, true);
   const concrete = noiseTex('#5b5862', ['#4a4752', '#6e6b78', '#3d3a45']);
-  groundPlane(-80, 80, -70, 50, 0, asphalt, 8);
+  groundPlane(-80, 80, -130, 50, 0, asphalt, 8);
   groundPlane(-64, 64, -9, -6, 0.02, pave, 3);
   groundPlane(-64, 64, 6, 9, 0.02, pave, 3);
   groundPlane(-18, 2, 9, 26, 0.02, brick, 2.5);
@@ -416,13 +437,7 @@ function buildWorld() {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), new THREE.MeshBasicMaterial({ map: texFrom(c) })); m.position.set(x, 8, 0); m.rotation.y = zh < 0 ? Math.PI / 2 : -Math.PI / 2; world.add(m);
   }
   // yard walls + warehouse
-  const wallMat = toon({ color: 0x4d4858 });
-  solidBox(-31, -30, -63, -30, 4.5, wallMat, 0.05);
-  solidBox(44, 45, -63, -30, 4.5, wallMat, 0.05);
-  solidBox(-31, 45, -64, -62, 4.5, wallMat, 0.05);
-  const wh = solidBox(-6, 30, -62, -50, 10, facadeMat(3, 36, 10), 0.08);
-  const doorC = makeCanvas(256, 256), dg = doorC.getContext('2d'); dg.fillStyle = '#6a6170'; dg.fillRect(0, 0, 256, 256); for (let y = 0; y < 256; y += 12) { dg.fillStyle = '#4e4656'; dg.fillRect(0, y, 256, 4); } dg.fillStyle = '#c41e2e'; dg.font = '700 40px "Barlow Condensed", sans-serif'; dg.textAlign = 'center'; dg.fillText('GODOWN', 128, 60);
-  const rd = new THREE.Mesh(new THREE.PlaneGeometry(9, 7), toon({ map: texFrom(doorC) })); rd.position.set(12, 3.5, -49.95); world.add(rd);
+  // yard (the compound and its godowns are built in buildCompound)
   // shipping containers and crates
   const cont = (x, z, alongX, color, stacked = false) => {
     const w = alongX ? 12 : 2.5, d = alongX ? 2.5 : 12; const hh = stacked ? 5.2 : 2.6;
@@ -436,6 +451,7 @@ function buildWorld() {
   const crateMat = toon({ color: 0xa47a45 });
   for (const [x, z] of [[-6, -44], [-4.6, -44], [-5.3, -42.6], [18, -35], [19.4, -35], [22, -46], [-12, -50], [8, -44]]) solidBox(x - 0.6, x + 0.6, z - 0.6, z + 0.6, 1.2, crateMat, 0.04);
   for (const [x, z] of [[-12, -42], [6, -40], [22, -38], [-21, -50], [12, -46], [33, -48], [-10, -56], [38, -58], [-14, -58]]) yardPts.push(new V3(x, 0, z));
+  buildCompound();
   // yard sodium lights
   for (const [x, z] of [[-14, -47], [24, -45]]) {
     boxMesh(0.25, 8, 0.25, toon({ color: 0x3a3442 }), x, 4, z, 0.03); boxMesh(1.2, 0.3, 0.5, new THREE.MeshBasicMaterial({ color: 0xffb04a }), x, 8, z, 0.03);
@@ -509,6 +525,117 @@ function buildWorld() {
 }
 
 // ---------------------------------------------------------------- navigation
+// ---------------------------------------------------------------- the compound: Godown 1 and 2, the main godown with the breakroom and the roof stairs
+const ROOF_Y = 7.6;
+const ramps = [];          // walkable slopes: height rises along +x from y0 to y1
+const roofPts = [];        // where Yaki walks and shoots from
+const stairDoor = { solid: null, pivot: null, open: false, k: 0, x: 29.75, z: -105.65 };
+const keySpot = new V3(-20.2, 0, -104.2);
+function slab(x0, x1, z0, z1, y0, y1, mat, outline = 0.05) { const s = addSolid(x0, x1, z0, z1, y1); s.y0 = y0; boxMesh(x1 - x0, y1 - y0, z1 - z0, mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, outline); return s; }
+// a wall along x (at z) or along z (at x), 0.5 thick, with door gaps and a lintel over each gap
+function wallX(x0, x1, z, h, mat, gaps = [], doorH = 3.2) {
+  let a = x0; for (const [g0, g1] of [...gaps].sort((p, q) => p[0] - q[0])) { if (g0 > a) solidBox(a, g0, z - 0.25, z + 0.25, h, mat, 0.05); a = g1; }
+  if (a < x1) solidBox(a, x1, z - 0.25, z + 0.25, h, mat, 0.05);
+  for (const [g0, g1] of gaps) if (h > doorH) slab(g0, g1, z - 0.25, z + 0.25, doorH, h, mat);
+}
+function wallZ(x, z0, z1, h, mat, gaps = [], doorH = 3.2) {
+  let a = z0; for (const [g0, g1] of [...gaps].sort((p, q) => p[0] - q[0])) { if (g0 > a) solidBox(x - 0.25, x + 0.25, a, g0, h, mat, 0.05); a = g1; }
+  if (a < z1) solidBox(x - 0.25, x + 0.25, a, z1, h, mat, 0.05);
+  for (const [g0, g1] of gaps) if (h > doorH) slab(x - 0.25, x + 0.25, g0, g1, doorH, h, mat);
+}
+function signPlane(zh, en, w, h, board, ink, x, y, z, ry = 0) {
+  const c = makeCanvas(512, 160), g = c.getContext('2d'); g.fillStyle = board; g.fillRect(0, 0, 512, 160); g.strokeStyle = '#0b0710'; g.lineWidth = 10; g.strokeRect(5, 5, 502, 150);
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = ink; g.font = '900 70px "Noto Sans TC", sans-serif'; g.fillText(zh, 256, 62); g.font = '700 34px "Barlow Condensed", sans-serif'; g.fillText(en, 256, 128);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: texFrom(c) })); m.position.set(x, y, z); m.rotation.y = ry; world.add(m); return m;
+}
+function buildCompound() {
+  const wallMat = toon({ color: 0x4d4858 }), floor = noiseTex('#4f4c56', ['#45424c', '#5c5964', '#3a3742'], 256, true);
+  solidBox(-31, -30, -110, -30, 4.5, wallMat, 0.05); solidBox(44, 45, -110, -30, 4.5, wallMat, 0.05); solidBox(-31, 45, -110, -108, 4.5, wallMat, 0.05);
+  groundPlane(-30, 44, -108, -62, 0.021, noiseTex('#5b5862', ['#4a4752', '#6e6b78', '#3d3a45']), 6);
+  for (const [x0, x1, z0, z1] of [[-28, -4, -86, -62], [8, 40, -86, -62], [-26, 40, -108, -92]]) groundPlane(x0, x1, z0, z1, 0.03, floor, 4);
+  const roofM = toon({ color: 0x35303d }), shutter = toon({ color: 0x7d7584 });
+  // ---- Godown 1 (west): tall racks you can slip between
+  const A = toon({ color: 0x56707a });
+  wallX(-28, -4, -62.25, 8, A, [[-21, -13]], 4.2); wallX(-28, -4, -85.75, 8, A, [[-18, -14]]);
+  wallZ(-27.75, -86, -62, 8, A); wallZ(-4.25, -86, -62, 8, A, [[-74, -71]]);
+  slab(-28, -4, -86, -62, 7.8, 8.3, roofM, 0.08);
+  boxMesh(8, 0.6, 0.3, shutter, -17, 4.5, -62.1, 0.03);
+  const rackM = toon({ color: 0x7a5a36 }), boxM = toon({ color: 0xb08a55 }), boxM2 = toon({ color: 0x8e9aa6 });
+  for (const [x0, x1] of [[-23.2, -21.2], [-16.4, -14.4], [-10, -8]]) for (const [z0, z1] of [[-72.5, -66], [-82.5, -75.5]]) {
+    solidBox(x0, x1, z0, z1, 3.0, rackM, 0.04);
+    for (let z = z0 + 0.6; z < z1 - 0.4; z += 1.3) for (const y of [3.35, 3.95]) if (srnd() < 0.75) boxMesh(1.1 + srnd() * 0.5, 0.55, 1.0, srnd() < 0.5 ? boxM : boxM2, (x0 + x1) / 2, y, z, 0.03);
+  }
+  signPlane('貨倉 一', 'GODOWN 1', 5, 1.6, '#2f6f7a', '#f4ead8', -17, 5.8, -61.95);
+  // ---- Godown 2 (east): pallet stacks
+  const B = toon({ color: 0x7a5f4a });
+  wallX(8, 40, -62.25, 7, B, [[18, 26]], 4.2); wallX(8, 40, -85.75, 7, B, [[30, 34]]);
+  wallZ(8.25, -86, -62, 7, B, [[-78, -75]]); wallZ(39.75, -86, -62, 7, B);
+  slab(8, 40, -86, -62, 6.8, 7.3, roofM, 0.08);
+  boxMesh(8, 0.6, 0.3, shutter, 22, 4.5, -62.1, 0.03);
+  const palM = toon({ color: 0xa47a45 });
+  for (const [x, z] of [[14.5, -69], [14.5, -79], [21.5, -69], [21.5, -79], [28.5, -69], [28.5, -79], [35, -74]]) { solidBox(x - 1.2, x + 1.2, z - 1.2, z + 1.2, 2.2, palM, 0.04); boxMesh(2.5, 0.15, 2.5, rackM, x, 0.08, z, 0.02); }
+  signPlane('貨倉 二', 'GODOWN 2', 5, 1.6, '#8a3f2c', '#f4ead8', 22, 5.4, -61.95);
+  // ---- the alleys: a little cover
+  const drum = toon({ color: 0x2f6f4f }), drum2 = toon({ color: 0x9a3a2a });
+  for (const [x, z, c] of [[0, -66, drum], [5.6, -72, drum2], [-1.2, -79.5, drum], [4.4, -84, drum2], [-22, -89.2, drum], [32, -89.5, drum2]]) {
+    addSolid(x - 0.45, x + 0.45, z - 0.45, z + 0.45, 1.15);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.15, 12), c); m.position.set(x, 0.575, z); world.add(m); const o = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 1.2, 12), inkMat); m.add(o);
+  }
+  solidBox(16, 19.5, -89.6, -87.8, 1.6, toon({ color: 0x3f6a3a }), 0.04); // dumpster
+  // ---- the main godown (Yee Kee) with the breakroom office and the roof stairs
+  const C = toon({ color: 0x5a5466 });
+  wallX(-26, 40, -92.25, ROOF_Y, C, [[-16, -12], [2, 6], [22, 26]]); wallX(-26, 40, -107.75, ROOF_Y, C);
+  wallZ(-25.75, -108, -92, ROOF_Y, C); wallZ(39.75, -108, -92, ROOF_Y, C);
+  slab(-26, 40, -100, -92, ROOF_Y - 0.4, ROOF_Y, roofM, 0.08); slab(-26, 30, -108, -100, ROOF_Y - 0.4, ROOF_Y, roofM, 0.08);
+  signPlane('義記貨倉', 'YEE KEE GODOWN', 7, 2.2, '#c41e2e', '#ffcf3a', 4, 5.2, -91.95);
+  for (const [x, z] of [[-4, -100], [14, -100]]) { solidBox(x - 1.2, x + 1.2, z - 2, z + 2, 2.5, palM, 0.04); }
+  // breakroom office in the back-west corner
+  const off = toon({ color: 0xb9ad94 }), wood = toon({ color: 0x8a5a2e });
+  wallX(-25.5, -14.5, -99.25, 3.4, off); wallZ(-14.75, -107.5, -99, 3.4, off, [[-103, -101]], 2.4);
+  solidBox(-21, -19.4, -104.7, -103.7, 0.8, wood, 0.03);
+  for (const [x, z] of [[-21.6, -104.2], [-18.8, -104.2]]) solidBox(x - 0.25, x + 0.25, z - 0.25, z + 0.25, 0.5, toon({ color: 0x4a4458 }), 0.02);
+  solidBox(-25.4, -24.5, -101.1, -100.1, 1.9, toon({ color: 0xd8d8e0 }), 0.03); // fridge
+  solidBox(-25.4, -24.4, -106.2, -105, 2.0, toon({ color: 0xc41e2e }), 0.03); // vending machine
+  boxMesh(0.05, 1.4, 0.9, new THREE.MeshBasicMaterial({ color: 0xffe6a0 }), -24.37, 1.2, -105.6, 0);
+  solidBox(-18.6, -15.6, -107.4, -106.4, 0.8, toon({ color: 0x6a3a4a }), 0.03); // couch
+  signPlane('休息室', 'BREAK ROOM', 1.8, 0.56, '#2a2533', '#ffcf3a', -14.45, 2.9, -102, Math.PI / 2);
+  const offL = new THREE.PointLight(0xffc070, 26, 9, 1.6); offL.position.set(-20, 2.9, -103); scene.add(offL);
+  boxMesh(1.2, 0.08, 0.3, new THREE.MeshBasicMaterial({ color: 0xfff2c0 }), -20, 3.35, -103, 0);
+  // roof stairs in the east end, behind a locked door
+  wallX(30, 39.5, -100.25, ROOF_Y, C); wallZ(29.75, -107.5, -100.5, ROOF_Y, C, [[-106.5, -104.8]], 2.6);
+  stairDoor.solid = addSolid(29.55, 29.95, -106.5, -104.8, 2.6);
+  const piv = new THREE.Group(); piv.position.set(29.75, 0, -106.5); world.add(piv); stairDoor.pivot = piv;
+  boxMesh(0.12, 2.55, 1.7, toon({ color: 0xa8281e }), 0, 1.28, 0.85, 0.03, piv); boxMesh(0.2, 0.3, 0.22, toon({ color: 0xe0b030 }), 0.12, 1.15, 1.45, 0.02, piv);
+  signPlane('樓梯 · 天台', 'ROOF STAIRS · LOCKED', 1.9, 0.6, '#c41e2e', '#f4ead8', 29.45, 3.0, -105.65, -Math.PI / 2);
+  ramps.push({ minX: 30.2, maxX: 39.5, minZ: -107.5, maxZ: -104.6, y0: 0, y1: ROOF_Y });
+  const stepM = toon({ color: 0x6e6878 }), n = 16;
+  for (let i = 0; i < n; i++) { const x0 = 30.2 + (39.5 - 30.2) * i / n, x1 = 30.2 + (39.5 - 30.2) * (i + 1) / n, top = ROOF_Y * (i + 1) / n; boxMesh(x1 - x0, top, 2.9, stepM, (x0 + x1) / 2, top / 2, -106.05, 0.02); }
+  // the roof: parapet, plant, a big sign, and Yaki's perches
+  const par = toon({ color: 0x4a4556 });
+  slab(-26, 40, -92.5, -92, ROOF_Y, ROOF_Y + 0.8, par); slab(-26, 30, -108, -107.5, ROOF_Y, ROOF_Y + 0.8, par);
+  slab(-26, -25.5, -107.5, -92.5, ROOF_Y, ROOF_Y + 0.8, par); slab(39.5, 40, -100, -92.5, ROOF_Y, ROOF_Y + 0.8, par); slab(39.5, 40, -108, -100, ROOF_Y, ROOF_Y + 0.8, par);
+  const ac = toon({ color: 0x9a97a2 });
+  for (const [x, z] of [[-10, -102.5], [6, -103.5], [20, -104]]) slab(x - 1.1, x + 1.1, z - 0.8, z + 0.8, ROOF_Y, ROOF_Y + 1.2, ac, 0.04);
+  { const t = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 2.6, 16), toon({ color: 0x5f7f8a })); t.position.set(-20, ROOF_Y + 1.6, -104); world.add(t); t.add(new THREE.Mesh(new THREE.CylinderGeometry(1.36, 1.36, 2.66, 16), inkMat)); addSolid(-21.3, -18.7, -105.3, -102.7, ROOF_Y + 2.9).y0 = ROOF_Y; }
+  for (const x of [2, 14]) boxMesh(0.3, 4, 0.3, toon({ color: 0x3a3442 }), x, ROOF_Y + 2, -106.5, 0.03);
+  signPlane('義記運輸', 'YEE KEE TRANSPORT', 14, 3.6, '#1f2a5c', '#ffcf3a', 8, ROOF_Y + 5, -106.6);
+  const rl = new THREE.PointLight(0xff9a3a, 40, 26, 1.6); rl.position.set(8, ROOF_Y + 4, -97); scene.add(rl);
+  for (const [x, z] of [[-18, -94.6], [-4, -94.6], [10, -94.6], [24, -94.6], [36, -96], [12, -100], [-14, -97]]) roofPts.push(new V3(x, ROOF_Y, z));
+  // interior lights
+  for (const [x, z, c] of [[-16, -74, 0x9ec8ff], [24, -74, 0xffb060], [6, -100, 0xbfd8ff]]) { const L = new THREE.PointLight(c, 45, 24, 1.6); L.position.set(x, 6, z); scene.add(L); boxMesh(1.6, 0.1, 0.4, new THREE.MeshBasicMaterial({ color: c }), x, 6.6, z, 0); }
+}
+// height of whatever the actor can stand on at (x, z): floors, crate tops, the roof, the stairs
+function groundAt(x, z, y) {
+  let g = 0;
+  for (const s of solids) if (s.h <= y + 0.55 && s.h > g && x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) g = s.h;
+  for (const r of ramps) if (x >= r.minX - 0.2 && x <= r.maxX && z >= r.minZ && z <= r.maxZ) { const h = r.y0 + (r.y1 - r.y0) * clamp((x - r.minX) / (r.maxX - r.minX), 0, 1); if (h <= y + 0.6 && h > g) g = h; }
+  return g;
+}
+function openStairs() {
+  stairDoor.open = true; stairDoor.k = 0; const i = solids.indexOf(stairDoor.solid); if (i >= 0) solids.splice(i, 1);
+  msg('The stair door is open. Yaki is on the roof.', 'good'); sfx('punch');
+}
+
 function segHitsBox(ax, az, bx, bz, b, inf) {
   let t0 = 0, t1 = 1; const dx = bx - ax, dz = bz - az;
   const mnx = b.minX - inf, mxx = b.maxX + inf, mnz = b.minZ - inf, mxz = b.maxZ + inf;
@@ -516,15 +643,19 @@ function segHitsBox(ax, az, bx, bz, b, inf) {
   if (Math.abs(dz) < 1e-9) { if (az < mnz || az > mxz) return false; } else { let ta = (mnz - az) / dz, tb = (mxz - az) / dz; if (ta > tb) { const t = ta; ta = tb; tb = t; } t0 = Math.max(t0, ta); t1 = Math.min(t1, tb); if (t0 > t1) return false; }
   return true;
 }
-function clearPath(ax, az, bx, bz, inf = 0.45) { for (const s of solids) if (s.h > 0.3 && segHitsBox(ax, az, bx, bz, s, inf)) return false; return true; }
+function clearPath(ax, az, bx, bz, inf = 0.45) { for (const s of solids) if (s.h > 0.3 && !(s.y0 > 2) && segHitsBox(ax, az, bx, bz, s, inf)) return false; return true; }
 const nodes = [];
 function buildNav() {
   for (const x of [-58, -46, -34, -22, -10, 2, 12, 22, 34, 46, 58]) for (const z of [-7.5, 0, 7.5]) nodes.push(new V3(x, 0, z));
   for (const [x, z] of [[-14, 10.8], [-8, 11], [-2, 10.8], [-16.5, 15.5], [-8, 15.4], [0.5, 15.5], [-12, 24.5], [-3, 24.5], [12, -12], [12, -20], [12, -28], [12, -33], [0, -34], [-12, -34], [-26, -34], [24, -34], [36, -34], [38, -46], [20, -42], [-2, -40], [-12, -46], [-26, -46], [6, -48], [30, -48], [-20, -58], [-4, -47], [36, -58]]) nodes.push(new V3(x, 0, z));
+  for (const [x, z] of [[-17, -59.5], [-17, -64.5], [-25.4, -64.5], [-25.4, -74], [-25.4, -84], [-18.8, -64.5], [-18.8, -74], [-18.8, -84], [-12.2, -64.5], [-12.2, -74], [-12.2, -84], [-6.3, -64.5], [-6.3, -74], [-6.3, -84],
+    [-16, -88.8], [-1.6, -72.5], [2, -60], [2, -70], [2, -80], [2, -89], [22, -59.5], [11, -65], [18, -65], [25, -65], [32, -65], [37.5, -65], [11, -74], [18, -74], [25, -74], [32, -74], [37.5, -74],
+    [11, -83], [18, -83], [25, -83], [32, -83], [37.5, -83], [5, -76.5], [32, -88.8], [-24, -89], [-12, -89], [12, -89], [24, -89], [42, -60], [42, -75], [42, -89], [42, -100],
+    [-14, -94.5], [4, -94.5], [24, -94.5], [-10, -96], [-10, -104], [0, -96], [0, -104], [10, -96], [10, -104], [20, -96], [20, -104], [27, -96], [27, -103.5], [-12.5, -102], [-17.5, -102], [-21, -101.5], [-23, -105]]) nodes.push(new V3(x, 0, z));
   for (const n of nodes) n.links = [];
   for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
     const a = nodes[i], b = nodes[j], d = a.distanceTo(b);
-    if (d < 26 && clearPath(a.x, a.z, b.x, b.z, 0.55)) { a.links.push([j, d]); b.links.push([i, d]); }
+    if (d < 26 && clearPath(a.x, a.z, b.x, b.z, 0.5)) { a.links.push([j, d]); b.links.push([i, d]); }
   }
 }
 function nearestVisible(p) { let best = -1, bd = 1e9; for (let i = 0; i < nodes.length; i++) { const d = nodes[i].distanceToSquared(p); if (d < bd && clearPath(p.x, p.z, nodes[i].x, nodes[i].z, 0.3)) { bd = d; best = i; } } return best; }
@@ -598,10 +729,93 @@ const glintTex = spriteTex((g, s) => { const r = g.createRadialGradient(s / 2, s
 const bangTex = spriteTex((g, s) => { g.font = '900 52px "Bungee", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 8; g.strokeStyle = '#0b0710'; g.strokeText('!', s / 2, s / 2 + 2); g.fillStyle = '#ffc23a'; g.fillText('!', s / 2, s / 2 + 2); });
 const sparkTex = spriteTex((g, s) => { const r = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2); r.addColorStop(0, 'rgba(255,255,230,1)'); r.addColorStop(0.35, 'rgba(255,200,80,.9)'); r.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = r; g.fillRect(0, 0, s, s); });
 
+// ---------------------------------------------------------------- stealth: what the crew can see and hear
+const qTex = spriteTex((g, s) => { g.font = '900 52px "Bungee", Impact, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 8; g.strokeStyle = '#0b0710'; g.strokeText('?', s / 2, s / 2 + 2); g.fillStyle = '#ffffff'; g.fillText('?', s / 2, s / 2 + 2); });
+function markFor(g) {
+  if (!g.mark) { g.mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: qTex, transparent: true, depthWrite: false, fog: false })); g.mark.scale.setScalar(0.65); g.mark.position.y = g.h + 0.5; g.mark.visible = false; g.root.add(g.mark); }
+  return g.mark;
+}
+// 0 = can't see you, up to 1 = right in front of them
+function playerVisibleFrom(g, range, fov) {
+  if (!player.alive) return 0;
+  const dx = player.pos.x - g.pos.x, dz = player.pos.z - g.pos.z, d = Math.hypot(dx, dz) + Math.abs(player.pos.y - g.pos.y) * 0.5;
+  if (d > range) return 0;
+  let ang = Math.atan2(dx, dz) - g.yaw; ang = Math.atan2(Math.sin(ang), Math.cos(ang));
+  if (Math.abs(ang) > fov / 2 && d > 2.0) return 0;
+  const o = new V3(g.pos.x, g.pos.y + g.h * 0.9, g.pos.z), t = new V3(player.pos.x, player.pos.y + (player.sneak ? 0.8 : 1.35), player.pos.z);
+  const dir = t.clone().sub(o), L = dir.length(); dir.divideScalar(L);
+  if (rayWorld(o, dir, L) < L - 0.1) return 0;
+  return 1 - d / range;
+}
+function perceive(g, dt, range = 17, fov = 2.1) {
+  const m = markFor(g);
+  if (g.aggro) {
+    if (g.markT > 0) { g.markT -= dt; m.visible = true; } else m.visible = false;
+    if (playerVisibleFrom(g, range * 1.7, 6.3) > 0) { g.lastSeen = player.pos.clone(); g.lostT = 0; }
+    else {
+      g.lostT = (g.lostT || 0) + dt;
+      if (g.rigType !== 'yaki' && g.lostT > 8 && g.windup <= 0) { g.aggro = false; g.sus = 0.5; g.searchT = 8; g.path = findPath(g.pos, g.lastSeen || g.pos); g.investigate = null; }
+    }
+    return;
+  }
+  const v = playerVisibleFrom(g, range, fov);
+  const spd = Math.hypot(player.vel.x, player.vel.z), d = g.pos.distanceTo(player.pos);
+  const loud = player.sneak ? 1.3 : spd > 5.5 ? 7 : spd > 0.5 ? 3.2 : 1.6;
+  let rate = v > 0 ? (0.5 + 2.6 * v) * (player.sneak ? 0.4 : 1) * (spd > 5.5 ? 1.3 : 1) : 0;
+  if (player.alive && d < loud && Math.abs(player.pos.y - g.pos.y) < 2) rate += 1.3;
+  if (rate > 0) { g.sus = Math.min(1, (g.sus || 0) + rate * dt); g.lookAt = player.pos.clone(); } else g.sus = Math.max(0, (g.sus || 0) - dt * 0.18);
+  g.suspicious = g.sus > 0.3;
+  m.visible = g.sus > 0.06; m.material.map = qTex; m.material.opacity = 0.35 + 0.65 * g.sus; m.material.color.setRGB(1, 1 - 0.75 * g.sus, 1 - 0.95 * g.sus);
+  if (g.sus >= 1) spotted(g);
+}
+function spotted(g, quiet = false) {
+  if (g.aggro) return;
+  g.aggro = true; g.sus = 1; g.lastSeen = player.pos.clone(); g.lostT = 0; g.searchT = 0;
+  const m = markFor(g); m.material.map = bangTex; m.material.color.set(0xffffff); m.material.opacity = 1; m.visible = true; g.markT = 1.5;
+  if (quiet) return;
+  sfx('goon', g.pos.distanceTo(player.pos)); msg((g.rigType === 'yaki' ? 'Yaki' : g.boss ? 'Big Ma' : g.name) + ' spotted you!', 'bad');
+  for (const o of actors) if (o !== g && o.kind === 'goon' && o.alive && !o.aggro && o.pos.distanceTo(g.pos) < 12 && Math.abs(o.pos.y - g.pos.y) < 2) spotted(o, true);
+}
+// walk the beat; stop and stare at a noise; go and look where you were last seen
+function patrol(g, dt, speed) {
+  if (g.suspicious && g.lookAt) {
+    g.animSpeed = lerp(g.animSpeed, 0, Math.min(1, dt * 6)); g.yaw = turnTo(g.yaw, Math.atan2(g.lookAt.x - g.pos.x, g.lookAt.z - g.pos.z), dt * 4);
+    g.label = 'Heard something...'; g.investigate = g.lookAt.clone(); return;
+  }
+  if (g.investigate && g.sus < 0.3) { g.searchT = 6; g.path = findPath(g.pos, g.investigate); g.investigate = null; }
+  if (g.searchT > 0) {
+    g.label = 'Searching';
+    if (followPath(g, speed * 1.25, dt)) { g.searchT -= dt; g.yaw += dt * 1.8 * Math.sin(g.searchT * 1.7); if (g.searchT <= 0) g.path = []; }
+    return;
+  }
+  const route = g.route; g.label = g.patrolLabel || 'Patrolling';
+  if (!route || !route.length) { g.animSpeed = lerp(g.animSpeed, 0, Math.min(1, dt * 6)); return; }
+  if (!g.path.length) {
+    g.t -= dt; g.animSpeed = lerp(g.animSpeed, 0, Math.min(1, dt * 6));
+    if (g.t <= 0) { g.ri = ((g.ri ?? 0) + 1) % route.length; g.path = findPath(g.pos, route[g.ri]); g.t = rr(1.5, 3.5); }
+  } else followPath(g, speed, dt);
+}
+
 function gunProp(kind) {
   const g = new THREE.Group(), dark = toon({ color: 0x2b2733 }), steel = toon({ color: 0x6a6578 }), wood = toon({ color: 0x7a4a26 });
   if (kind === 'pistol') { boxMesh(0.05, 0.12, 0.06, dark, 0, -0.04, 0, 0.012, g); boxMesh(0.05, 0.05, 0.22, steel, 0, 0.04, 0.07, 0.012, g); g.userData.muzzle = new V3(0, 0.04, 0.2); }
   if (kind === 'smg') { boxMesh(0.06, 0.13, 0.06, dark, 0, -0.05, 0, 0.012, g); boxMesh(0.07, 0.09, 0.36, dark, 0, 0.04, 0.1, 0.012, g); boxMesh(0.04, 0.16, 0.05, steel, 0, -0.08, 0.12, 0.01, g); g.userData.muzzle = new V3(0, 0.04, 0.3); }
+  if (kind === 'rifle') {
+    boxMesh(0.06, 0.13, 0.32, wood, 0, -0.03, -0.2, 0.012, g); boxMesh(0.07, 0.09, 0.34, dark, 0, 0.03, 0.12, 0.012, g); boxMesh(0.035, 0.035, 0.62, steel, 0, 0.04, 0.6, 0.008, g);
+    boxMesh(0.04, 0.11, 0.05, dark, 0, -0.07, 0.02, 0.008, g); const sc = boxMesh(0.06, 0.06, 0.3, dark, 0, 0.12, 0.12, 0.01, g); boxMesh(0.075, 0.075, 0.04, steel, 0, 0.12, 0.28, 0.008, g);
+    g.userData.muzzle = new V3(0, 0.04, 0.92);
+  }
+  if (kind === 'key') {
+    const gold = toon({ color: 0xf0c040, emissive: 0x6a4a00 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 8, 16), gold); ring.position.z = -0.1; g.add(ring);
+    boxMesh(0.025, 0.025, 0.2, gold, 0, 0, 0.04, 0.008, g); boxMesh(0.025, 0.05, 0.025, gold, 0, -0.03, 0.12, 0.006, g); boxMesh(0.025, 0.04, 0.025, gold, 0, -0.025, 0.07, 0.006, g);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: sparkTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.6 })); glow.scale.setScalar(0.5); g.add(glow);
+  }
+  if (kind === 'scope') { boxMesh(0.05, 0.05, 0.2, dark, 0, 0, 0, 0.008, g); boxMesh(0.065, 0.065, 0.035, steel, 0, 0, 0.1, 0.006, g); boxMesh(0.02, 0.04, 0.02, dark, 0, -0.04, 0, 0.004, g); g.userData.muzzle = new V3(0, 0, 0.1); }
+  if (kind === 'pipe') {
+    const pm = toon({ color: 0x6f6a72 }); const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 1.05, 8), pm); cyl.rotation.x = Math.PI / 2; cyl.position.z = 0.36; g.add(cyl);
+    const ol = new THREE.Mesh(cyl.geometry, outlineMat(0.012)); ol.rotation.copy(cyl.rotation); ol.position.copy(cyl.position); g.add(ol);
+    boxMesh(0.09, 0.09, 0.09, toon({ color: 0x4a4550 }), 0, 0, 0.86, 0.012, g); boxMesh(0.075, 0.075, 0.16, toon({ color: 0x2b2733 }), 0, 0, -0.08, 0.01, g); g.userData.muzzle = new V3(0, 0, 0.86);
+  }
   if (kind === 'shotgun') { boxMesh(0.06, 0.12, 0.3, wood, 0, -0.02, -0.12, 0.012, g); boxMesh(0.06, 0.07, 0.62, dark, 0, 0.05, 0.3, 0.012, g); boxMesh(0.07, 0.06, 0.26, wood, 0, -0.01, 0.38, 0.012, g); g.userData.muzzle = new V3(0, 0.05, 0.6); }
   return g;
 }
@@ -616,7 +830,8 @@ function makeActor(tplKey, opts = {}) {
     inst.traverse((o) => { if (o.isSkinnedMesh) { o.frustumCulled = false; if (o.name !== 'outline' && !mesh) mesh = o; } });
     mat = mesh.material.clone(); mat.color.set(opts.tint || 0xffffff); mesh.material = mat;
     mixer = new THREE.AnimationMixer(inst); actions = {};
-    for (const c of tpl.clips) { const act = mixer.clipAction(c); if (c.name !== 'Idle' && c.name !== 'Hop') { act.setLoop(THREE.LoopOnce, 1); act.clampWhenFinished = true; } actions[c.name] = act; }
+    for (const c of tpl.clips) { const act = mixer.clipAction(c); if (!['Idle', 'Hop', 'Walk', 'Sneak', 'Aim', 'Run', 'Eat', 'Chat', 'Cower', 'Cook', 'Dive'].includes(c.name)) { act.setLoop(THREE.LoopOnce, 1); act.clampWhenFinished = true; } actions[c.name] = act; }
+    opts.inst = inst;
   } else {
     mat = toon({ map: tpl.map, vertexColors: tpl.vcol, color: opts.tint || 0xffffff, emissive: 0x000000 });
     mesh = new THREE.Mesh(tpl.geo, mat); body.add(mesh);
@@ -628,12 +843,13 @@ function makeActor(tplKey, opts = {}) {
     tplKey, root, pivot, body, mesh, mat, h, scale, pos: root.position, yaw: 0, vel: new V3(), vy: 0, grounded: true,
     radius: opts.radius || 0.42, alive: true, hp: 100, maxHp: 100, kind: opts.kind || 'civ', name: opts.name || '', label: '',
     phase: R() * 10, anim: 'idle', animSpeed: 0, flash: 0, deadT: 0, path: [], state: 'idle', t: 0,
-    mixer, actions, clip: null, hitT: 0,
+    mixer, actions, clip: null, hitT: 0, inst: opts.inst || null, rigType: opts.rigType || null, bones: {},
   };
   if (mixer) { actions.Idle.time = R() * 2; playClip(a, 'Idle', 1); }
   actors.push(a); return a;
 }
-function removeActor(a) { scene.remove(a.root); const i = actors.indexOf(a); if (i >= 0) actors.splice(i, 1); }
+function attach(a, boneName, obj, pos) { const b = a.inst.getObjectByName(boneName); obj.position.copy(pos); obj.scale.multiplyScalar(1 / a.scale); b.add(obj); return obj; }
+function removeActor(a) { scene.remove(a.root); if (a.laser) scene.remove(a.laser); const i = actors.indexOf(a); if (i >= 0) actors.splice(i, 1); }
 
 function playClip(a, name, timeScale = 1) {
   const act = a.actions[name]; if (!act) return;
@@ -644,16 +860,71 @@ function playClip(a, name, timeScale = 1) {
   if (prev) act.crossFadeFrom(prev, name === 'Death' ? 0.08 : 0.14, false);
   a.clip = name;
 }
+function pickClip(a, dt) {
+  if (!a.alive) return ['Death', 1];
+  if (a.rigType === 'wa') {
+    if (a.dodgeT > 0) return [a.dodgeSide > 0 ? 'DodgeL' : 'DodgeR', 1];
+    if (a.windup > 0 || a.lunge > 0) return ['Attack', 1];
+    if (a.hitT > 0) { a.hitT -= dt; return ['Hit', 1]; }
+    if (a.animSpeed > 0.3) return ['Walk', clamp(a.animSpeed / 2.0, 0.7, 1.6)];
+    return ['Idle', 1];
+  }
+  if (a.rigType === 'yaki') {
+    if (a.hitT > 0) { a.hitT -= dt; return ['Hit', 1]; }
+    if (a.act === 'order') return ['Order', 1];
+    if (a.act === 'shoot') return ['Shoot', 1];
+    if (a.act === 'aim') return ['Aim', 1];
+    if (a.animSpeed > 0.3) return a.sneak ? ['Sneak', clamp(a.animSpeed / 1.7, 0.7, 1.5)] : ['Walk', clamp(a.animSpeed / 1.9, 0.7, 1.8)];
+    return ['Idle', 1];
+  }
+  if (a.rigType === 'human') {
+    if (a.anim === 'dive' || a.anim === 'prone') return ['Dive', 1];
+    if (a.anim === 'punch') return ['Punch', 1];
+    if (a.hitT > 0) { a.hitT -= dt; return ['Hit', 1]; }
+    if (a === player && !a.grounded) return ['Jump', 1];
+    if (a === player && a.sneak) return a.animSpeed > 0.3 ? ['Sneak', clamp(a.animSpeed / 1.7, 0.6, 1.6)] : ['Crouch', 1];
+    if (a.anim === 'cower') return ['Cower', 1];
+    if (a.animSpeed > 3.3) return ['Run', clamp(a.animSpeed / 5.6, 0.75, 1.5)];
+    if (a.animSpeed > 0.3) return ['Walk', clamp(a.animSpeed / 1.45, 0.6, 1.8)];
+    if (a.anim === 'eat') return ['Eat', 1];
+    if (a.anim === 'chat') return ['Chat', 1];
+    return ['Idle', 1];
+  }
+  if (a.rigType === 'chef') {
+    if (a.hitT > 0) { a.hitT -= dt; return ['Hit', 1]; }
+    return [a.scared > 0 ? 'Cower' : 'Cook', 1];
+  }
+  if (a.windup > 0 || a.lunge > 0) return ['Lunge', a.boss ? 0.84 : 1.2];
+  if (a.hitT > 0) { a.hitT -= dt; return ['Hit', 1]; }
+  if (a.animSpeed > 0.3) return ['Hop', clamp(a.animSpeed / 3.2, 0.55, 1.5)];
+  return ['Idle', 1];
+}
 function animateRigged(a, dt) {
-  let want = 'Idle', ts = 1;
-  if (!a.alive) want = 'Death';
-  else if (a.windup > 0 || a.lunge > 0) { want = 'Lunge'; ts = a.boss ? 0.84 : 1.2; }
-  else if (a.hitT > 0) { want = 'Hit'; a.hitT -= dt; }
-  else if (a.animSpeed > 0.3) { want = 'Hop'; ts = clamp(a.animSpeed / 3.2, 0.55, 1.5); }
+  const [want, ts] = pickClip(a, dt);
   playClip(a, want, ts);
   a.mixer.update(dt);
+  if (a.rigType === 'human') {
+    let pitch = 0, py = a.h / 2;
+    if (a.alive && a.anim === 'dive') { pitch = 1.3; py = a.h * 0.32; } else if (a.alive && a.anim === 'prone') { pitch = 1.45; py = 0.3; }
+    const k = Math.min(1, dt * 12); a.pivot.rotation.x = lerp(a.pivot.rotation.x, pitch, k); a.pivot.position.y = lerp(a.pivot.position.y, py, Math.min(1, dt * 16));
+    if (a.alive && a.aimArms) aimArms(a, dt);
+  }
   a.root.rotation.y = a.yaw;
   if (a.flash > 0) { a.flash = Math.max(0, a.flash - dt * 5); a.mat.emissive.setRGB(a.flash, a.flash * 0.25, a.flash * 0.2); }
+}
+// Raise the gun arm over whatever clip is playing. Bones rest with identity rotation (arms hanging, facing +Z).
+const _q = new THREE.Quaternion(), _e = new THREE.Euler();
+function setBone(a, name, x, y, z, w) {
+  const b = a.bones[name] || (a.bones[name] = a.inst.getObjectByName(name)); if (!b) return;
+  _q.setFromEuler(_e.set(x, y, z, 'YXZ')); b.quaternion.slerp(_q, w);
+}
+function aimArms(a, dt) {
+  const want = a.aimArms(); a.aimW = lerp(a.aimW || 0, want ? 1 : 0, Math.min(1, dt * 14)); const w = a.aimW; if (w < 0.01) return;
+  const pitch = want ? want.pitch : (a.lastPitch || 0); a.lastPitch = pitch;
+  const twist = want && want.two ? 0.18 : 0.1;
+  setBone(a, 'chest', 0, twist, 0, w);
+  setBone(a, 'upperarm_R', -Math.PI / 2 + pitch, -twist, 0.08, w); setBone(a, 'forearm_R', -0.08, 0, 0, w); setBone(a, 'hand_R', 0, 0, 0, w);
+  if (want && want.two) { setBone(a, 'upperarm_L', -1.15 + pitch, -twist, -0.62, w); setBone(a, 'forearm_L', -0.95, 0.25, 0, w); }
 }
 function animateActor(a, dt) {
   if (a.mixer) return animateRigged(a, dt);
@@ -688,7 +959,7 @@ function animateActor(a, dt) {
 function collide(a) {
   const r = a.radius;
   for (const s of solids) {
-    if (a.pos.y > s.h - 0.05) continue;
+    if (a.pos.y > s.h - 0.05 || (s.y0 && a.pos.y + 1.7 < s.y0)) continue;
     const cx = clamp(a.pos.x, s.minX, s.maxX), cz = clamp(a.pos.z, s.minZ, s.maxZ);
     let dx = a.pos.x - cx, dz = a.pos.z - cz; const d2 = dx * dx + dz * dz;
     if (d2 < r * r) {
@@ -696,13 +967,13 @@ function collide(a) {
       else { const pen = [a.pos.x - s.minX, s.maxX - a.pos.x, a.pos.z - s.minZ, s.maxZ - a.pos.z]; const m = pen.indexOf(Math.min(...pen)); if (m === 0) a.pos.x = s.minX - r; else if (m === 1) a.pos.x = s.maxX + r; else if (m === 2) a.pos.z = s.minZ - r; else a.pos.z = s.maxZ + r; }
     }
   }
-  a.pos.x = clamp(a.pos.x, -63.5, 63.5); a.pos.z = clamp(a.pos.z, -61.5, 25.5);
+  a.pos.x = clamp(a.pos.x, -63.5, 63.5); a.pos.z = clamp(a.pos.z, -109.5, 25.5);
 }
 function separate(dt) {
   for (let i = 0; i < actors.length; i++) {
     const a = actors[i]; if (!a.alive || !a.root.visible) continue;
     for (let j = i + 1; j < actors.length; j++) {
-      const b = actors[j]; if (!b.alive || !b.root.visible) continue;
+      const b = actors[j]; if (!b.alive || !b.root.visible || a.isChef || b.isChef || Math.abs(a.pos.y - b.pos.y) > 1.5) continue;
       const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, rr2 = a.radius + b.radius, d2 = dx * dx + dz * dz;
       if (d2 < rr2 * rr2 && d2 > 1e-6) { const d = Math.sqrt(d2), push = (rr2 - d) * 0.5; const nx = dx / d, nz = dz / d; if (a !== player) { a.pos.x -= nx * push; a.pos.z -= nz * push; } if (b !== player) { b.pos.x += nx * push; b.pos.z += nz * push; } }
     }
@@ -720,9 +991,10 @@ function followPath(a, speed, dt) {
 // ---------------------------------------------------------------- game state
 const WEAPONS = {
   fists: { name: 'Fists', weight: 0, dmg: 34, rate: 0.42, melee: true },
-  pistol: { name: 'Beretta', weight: 1.0, dmg: 34, rate: 0.2, mag: 15, spread: 0.010, pellets: 1, reload: 1.1 },
-  smg: { name: 'MP5K', weight: 2.2, dmg: 17, rate: 0.075, mag: 30, spread: 0.032, pellets: 1, auto: true, reload: 1.4 },
-  shotgun: { name: 'Pump Shotgun', weight: 3.2, dmg: 15, rate: 0.85, mag: 6, spread: 0.075, pellets: 8, reload: 1.9 },
+  pistol: { name: 'Beretta', weight: 1.0, dmg: 34, rate: 0.2, mag: 15, spread: 0.010, pellets: 1, reload: 1.1, zoom: 1.3, ads: 0.6 },
+  smg: { name: 'MP5K', weight: 2.2, dmg: 17, rate: 0.075, mag: 30, spread: 0.032, pellets: 1, auto: true, reload: 1.4, zoom: 1.35, ads: 0.65 },
+  shotgun: { name: 'Pump Shotgun', weight: 3.2, dmg: 15, rate: 0.85, mag: 6, spread: 0.075, pellets: 8, reload: 1.9, zoom: 1.15, ads: 0.85 },
+  rifle: { name: 'Sniper Rifle', weight: 3.4, dmg: 110, rate: 1.25, mag: 5, spread: 0.035, pellets: 1, reload: 2.4, zoom: 4.5, ads: 0.04, scope: true },
 };
 const NAMES = ['Ah Keung', 'Fat Chai', 'Uncle Wing', 'Siu Ming', 'Big Lun', 'Lo Kwai', 'Ah Sam', 'Tin Lok', 'Ming Jai', 'Uncle Bo', 'Kit Jai', 'Ah Hung', 'Old Tse', 'Wai Lok', 'Chung Gor', 'Ah Ngau'];
 const TINTS = [0xffffff, 0xffe0e0, 0xdfe8ff, 0xe6ffe0, 0xfff0c8, 0xe8dcff, 0xffffff, 0xd8f4f4];
@@ -738,42 +1010,68 @@ function newRun() {
   for (const p of projectiles) scene.remove(p.mesh); projectiles = [];
   for (const f of fx) scene.remove(f.obj); fx = [];
   for (const s of Object.values(spots).flat()) s.taken = null;
-  G = { dom: 0, heat: 0, clock: 19 * 60, bt: false, btMeter: 100, stunt: 100, weapons: ['fists', 'pistol'], cur: 1, ammo: { pistol: 15, smg: 30, shotgun: 6 }, fireCD: 0, reloadT: 0, trigger: false, lastHit: 99, aimT: 0, aimTarget: null, over: false, msgs: [] };
+  G = { dom: 0, heat: 0, clock: 19 * 60, bt: false, btMeter: 100, stunt: 100, weapons: ['fists', 'pistol'], cur: 1, ammo: { pistol: 15, smg: 30, shotgun: 6, rifle: 5 }, scoped: {}, adsK: 0, shotT: 9, hasKey: false, lockMsgT: 0, fireCD: 0, reloadT: 0, trigger: false, lastHit: 99, aimT: 0, aimTarget: null, over: false, msgs: [] };
   // player
-  player = makeActor('guard', { kind: 'player', name: 'You', radius: 0.45 });
+  player = makeActor('guard', { kind: 'player', name: 'You', radius: 0.45, scale: 1.98, rigType: 'human' });
   player.pos.set(-8, 0, 5); player.yaw = Math.PI / 2; camYaw = Math.PI / 2; camPitch = 0.12; player.state = 'normal';
-  gunProps = {}; for (const k of ['pistol', 'smg', 'shotgun']) { const g = gunProp(k); g.position.set(-0.39, 1.0, 0.3); g.visible = false; player.body.add(g); gunProps[k] = g; }
+  gunProps = {}; for (const k of ['pistol', 'smg', 'shotgun', 'rifle']) { const g = gunProp(k); g.rotation.x = Math.PI / 2; attach(player, 'hand_R', g, new V3(0, -0.04, 0.012)); g.visible = false; gunProps[k] = g; }
+  for (const k of ['pistol', 'smg']) { const sc = gunProp('scope'); sc.position.set(0, k === 'smg' ? 0.13 : 0.11, k === 'smg' ? 0.1 : 0.06); sc.visible = false; gunProps[k].add(sc); gunProps[k].userData.scopeMesh = sc; }
+  player.aimArms = () => { const k = G.weapons[G.cur]; if (k === 'fists' || player.state !== 'normal' || player.anim === 'punch') return null; return { pitch: clamp(camPitch, -0.6, 0.9), two: k !== 'pistol' }; };
   // civilians
   const names = [...NAMES].sort(() => R() - 0.5);
   const civs = [];
   const startSpots = [...spots.shop, ...spots.corner, ...spots.table, ...spots.bench].sort(() => R() - 0.5);
   for (let i = 0; i < 14; i++) {
-    const c = makeActor('glasses', { kind: 'civ', name: names[i], tint: pick(TINTS), radius: 0.38 });
+    const c = makeActor('glasses', { kind: 'civ', name: names[i], tint: pick(TINTS), radius: 0.38, scale: 1.78, rigType: 'human' });
     const s = startSpots[i]; c.pos.copy(s.pos).add(new V3(rr(-1.5, 1.5), 0, rr(-0.6, 0.6))); c.yaw = R() * 6.28; c.hp = c.maxHp = 40;
     c.state = 'idle'; c.t = rr(0, 4); c.isHitman = false;
     const glint = new THREE.Sprite(new THREE.SpriteMaterial({ map: glintTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    glint.position.set(0.0, 1.54, 0.3); glint.scale.setScalar(0.45); glint.visible = false; c.body.add(glint); c.glint = glint;
+    glint.scale.setScalar(0.45); attach(c, 'head', glint, new V3(0, 0.115, 0.11)); glint.visible = false; c.glint = glint;
     civs.push(c);
   }
   civs.sort(() => R() - 0.5).slice(0, 3).forEach((h) => {
     h.isHitman = true; h.hp = h.maxHp = 100; h.susp = 0; h.revealed = false; h.fireCD = 1.5; h.burst = 0; h.burstT = 0; h.strafe = 1; h.strafeT = 0; h.pathT = 0; h.glintT = 0;
-    const g = gunProp('pistol'); g.position.set(-0.34, 0.98, 0.1); g.visible = false; h.body.add(g); h.gun = g;
+    const g = gunProp('pistol'); g.rotation.x = Math.PI / 2; attach(h, 'hand_R', g, new V3(0, -0.04, 0.012)); g.visible = false; h.gun = g;
+    h.aimArms = () => (h.revealed && player.alive ? { pitch: 0.02, two: false } : null);
     const bang = new THREE.Sprite(new THREE.SpriteMaterial({ map: bangTex, transparent: true, depthWrite: false, fog: false })); bang.position.set(0, 2.25, 0); bang.scale.setScalar(0.7); bang.visible = false; h.root.add(bang); h.bang = bang;
   });
-  // goons
-  for (const [x, z] of [[-12, -40], [6, -46], [24, -47], [-20, -52], [33, -44]]) {
-    const g = makeActor('ma', { kind: 'goon', name: 'Ma', radius: 0.42 }); g.pos.set(x, 0, z); g.hp = g.maxHp = 60; g.dmg = 12; g.run = 4.6; g.aggro = false; g.atkCD = 0; g.windup = 0; g.lunge = 0; g.t = rr(0, 3); g.pathT = 0; g.reward = 5;
+  // Mr. Nestor: a regular with places to be (never a hitman)
+  { const n = makeActor('nestor', { kind: 'civ', name: 'Mr. Nestor', radius: 0.4, scale: 1.83, rigType: 'human' }); const s = startSpots[14] || startSpots[0];
+    n.pos.copy(s.pos).add(new V3(rr(-1, 1), 0, 0)); n.yaw = R() * 6.28; n.hp = n.maxHp = 50; n.state = 'idle'; n.t = rr(1, 3); n.isHitman = false; }
+  // the chef behind the noodle stall
+  { const ch = makeActor('chef', { kind: 'civ', name: 'Chef Lo', radius: 0.3, scale: 1.72, rigType: 'chef' }); ch.pos.set(-8, 0, 19.15); ch.yaw = Math.PI;
+    ch.hp = ch.maxHp = 50; ch.state = 'chef'; ch.isChef = true; ch.isHitman = false; ch.scared = 0; ch.label = 'Cooking noodles'; }
+  // the crew: each on a beat. Ma in the yard and the godowns, Wa slouching inside, Big Ma minding Godown 2
+  const V = (pts) => pts.map(([x, z]) => new V3(x, 0, z));
+  const MA_BEATS = [[[-12, -42], [6, -40], [22, -38], [12, -46]], [[12, -33], [0, -34], [24, -34]], [[-18.8, -64.5], [-18.8, -84], [-6.3, -84], [-6.3, -64.5]], [[11, -65], [32, -65], [32, -83], [11, -83]], [[-10, -96], [10, -96], [10, -104], [-10, -104]]];
+  for (const beat of MA_BEATS) {
+    const g = makeActor('ma', { kind: 'goon', name: 'Ma', radius: 0.42, rigType: 'ma' }); g.route = V(beat); g.ri = 0; g.pos.copy(g.route[0]); g.hp = g.maxHp = 60; g.dmg = 12; g.run = 4.6; g.aggro = false; g.atkCD = 0; g.windup = 0; g.lunge = 0; g.t = rr(0, 3); g.pathT = 0; g.reward = 5; g.sus = 0;
   }
-  const boss = makeActor('maBig', { kind: 'goon', name: 'Big Ma', radius: 0.7, scale: 1.7 }); boss.pos.set(12, 0, -46); boss.hp = boss.maxHp = 240; boss.dmg = 24; boss.run = 3.7; boss.aggro = false; boss.atkCD = 0; boss.windup = 0; boss.lunge = 0; boss.t = 2; boss.pathT = 0; boss.reward = 15; boss.boss = true;
+  for (const [beat, lbl] of [[[[-25.4, -74], [-12.2, -74], [-12.2, -84]], 'Slouching in Godown 1'], [[[27, -96], [27, -103.5], [20, -100]], 'Guarding the roof stairs']]) {
+    const w = makeActor('wa', { kind: 'goon', name: 'Wa', radius: 0.5, scale: 1.85, rigType: 'wa' }); w.route = V(beat); w.ri = 0; w.pos.copy(w.route[0]); w.yaw = R() * 6.28; w.patrolLabel = lbl; w.sus = 0;
+    w.hp = w.maxHp = 160; w.dmg = 26; w.aggro = false; w.atkCD = 0; w.windup = 0; w.lunge = 0; w.t = rr(0, 3); w.pathT = 0; w.reward = 8;
+    w.dodgeT = 0; w.dodgeCD = 0; w.strafe = R() < 0.5 ? -1 : 1; w.strafeT = 0; w.weave = R() * 6;
+    { const pipe = gunProp('pipe'); pipe.scale.setScalar(1 / 1.85); pipe.position.set(-0.01, 0, 0); w.inst.getObjectByName('hand_R').add(pipe); w.pipe = pipe; }
+  }
+  const yk = makeActor('yaki', { kind: 'goon', name: 'Yaki', radius: 0.45, scale: 1.75, rigType: 'yaki' });
+  yk.pos.set(-4, ROOF_Y, -94.6); yk.yaw = 0; yk.postYaw = 0; yk.ri = 1; yk.scan = 0; yk.sus = 0; yk.hp = yk.maxHp = 200; yk.reward = 20; yk.aggro = false; yk.alerted = false; yk.state = 'post'; yk.t = 0; yk.nextOrder = 15; yk.cd = 0; yk.repath = 0;
+  { const hand = yk.inst.getObjectByName('hand_R'); const g = gunProp('rifle'); g.rotation.x = Math.PI / 2; g.position.set(0, -0.045, 0.012); g.scale.setScalar(1 / 1.75); hand.add(g); yk.gun = g;
+    const lz = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new V3(), new V3(0, 0, 1)]), new THREE.LineBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.55, depthWrite: false })); lz.frustumCulled = false; lz.visible = false; scene.add(lz); yk.laser = lz; }
+  const boss = makeActor('maBig', { kind: 'goon', name: 'Big Ma', radius: 0.7, scale: 1.7, rigType: 'ma' }); boss.route = V([[25, -74], [37.5, -74], [37.5, -83]]); boss.ri = 0; boss.pos.copy(boss.route[0]); boss.patrolLabel = 'Minding Godown 2'; boss.sus = 0; boss.hp = boss.maxHp = 240; boss.dmg = 24; boss.run = 3.7; boss.aggro = false; boss.atkCD = 0; boss.windup = 0; boss.lunge = 0; boss.t = 2; boss.pathT = 0; boss.reward = 15; boss.boss = true;
+  // the stair key and the locked roof door
+  addPickup('key', keySpot.clone());
+  stairDoor.open = false; stairDoor.k = 0; stairDoor.pivot.rotation.y = 0; if (!solids.includes(stairDoor.solid)) solids.push(stairDoor.solid);
+  setSneak(false);
   // weapon pickups
   addPickup('smg', new V3(12, 0, -16)); addPickup('shotgun', new V3(-16.2, 0, 24.6));
+  { const pawn = spots.shop.find((s) => /Pawn/.test(s.label)); addPickup('scope', pawn ? pawn.pos.clone().add(new V3(-1.4, 0, 0)) : new V3(20, 0, 6)); }
   setWeapon(1); updateHUD(true);
 }
 
 // ---------------------------------------------------------------- pickups
 function addPickup(kind, pos) {
   const g = new THREE.Group(); g.position.copy(pos); scene.add(g);
-  const prop = gunProp(kind); prop.scale.setScalar(2.2); prop.rotation.y = Math.PI / 2; prop.position.y = 0.9; g.add(prop);
+  const prop = gunProp(kind); prop.scale.setScalar(kind === 'rifle' ? 1.5 : kind === 'scope' ? 3 : kind === 'key' ? 2.4 : 2.2); prop.rotation.y = Math.PI / 2; prop.position.y = kind === 'key' ? 1.05 : 0.9; g.add(prop);
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.75, 24), new THREE.MeshBasicMaterial({ color: 0xffc23a, transparent: true, opacity: 0.8, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; g.add(ring);
   pickups.push({ kind, mesh: g, prop, cd: 0 });
 }
@@ -793,7 +1091,7 @@ function updateFx(dtw) {
 
 // ---------------------------------------------------------------- ray tests
 function rayBox(o, d, b, tmax) {
-  let t0 = 0, t1 = tmax; const mn = [b.minX, 0, b.minZ], mx = [b.maxX, b.h, b.maxZ], os = [o.x, o.y, o.z], ds = [d.x, d.y, d.z];
+  let t0 = 0, t1 = tmax; const mn = [b.minX, b.y0 || 0, b.minZ], mx = [b.maxX, b.h, b.maxZ], os = [o.x, o.y, o.z], ds = [d.x, d.y, d.z];
   for (let i = 0; i < 3; i++) {
     if (Math.abs(ds[i]) < 1e-9) { if (os[i] < mn[i] || os[i] > mx[i]) return Infinity; }
     else { let ta = (mn[i] - os[i]) / ds[i], tb = (mx[i] - os[i]) / ds[i]; if (ta > tb) { const t = ta; ta = tb; tb = t; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) return Infinity; }
@@ -808,7 +1106,7 @@ function rayCyl(o, d, cx, cz, r, y0, y1, tmax) {
   for (const t of [(-B - s) / (2 * A), (-B + s) / (2 * A)]) { if (t < 0 || t > tmax) continue; const y = o.y + d.y * t; if (y >= y0 && y <= y1) return t; }
   return Infinity;
 }
-function hitHeight(a) { return (a.anim === 'dive' || a.anim === 'prone') ? 0.75 : (a.alive ? a.h : 0); }
+function hitHeight(a) { return (a.anim === 'dive' || a.anim === 'prone') ? 0.75 : (a.alive ? a.h * (a.sneak && a === player ? 0.7 : 1) : 0); }
 function rayActors(o, d, tmax, exclude) {
   let best = null, bt = tmax;
   for (const a of actors) { if (a === exclude || !a.alive || !a.root.visible) continue; const t = rayCyl(o, d, a.pos.x, a.pos.z, a.radius + 0.05, a.pos.y, a.pos.y + hitHeight(a), bt); if (t < bt) { bt = t; best = a; } }
@@ -834,12 +1132,23 @@ function updateHUD(force = false) {
   const wk = G.weapons[G.cur], W = WEAPONS[wk];
   setText('#wname', W.name);
   setText('#ammo', W.melee ? '—' : (G.reloadT > 0 ? 'Reloading' : G.ammo[wk] + ' / ' + W.mag));
-  const lo = G.weapons.map((k, i) => `<div class="${i === G.cur ? 'cur' : ''}"><b>${i + 1}</b> ${WEAPONS[k].name} · ${WEAPONS[k].weight.toFixed(1)}</div>`).join('');
+  const lo = G.weapons.map((k, i) => `<div class="${i === G.cur ? 'cur' : ''}"><b>${i + 1}</b> ${WEAPONS[k].name}${G.scoped[k] ? ' + Scope' : ''} · ${WEAPONS[k].weight.toFixed(1)}</div>`).join('');
   if (hudCache.lo !== lo) { hudCache.lo = lo; $('#loadout').innerHTML = lo; }
   const w = weight(); setText('#wtn', 'Weight ' + w.toFixed(1) + ' · ' + (w < 1.5 ? 'Agile' : w < 3.5 ? 'Steady' : 'Heavy'));
   setW('#wtb', w / 6.4);
+  const yk = actors.find((a) => a.rigType === 'yaki');
+  setText('#obj', !G.hasKey ? 'Find the stair key: breakroom, back of the main godown' : !stairDoor.open ? 'Unlock the roof stairs: east end of the main godown' : (yk && yk.alive ? 'Take Yaki down on the roof' : 'Done'));
   const mins = Math.floor(G.clock) % 1440; setText('#clock', String(Math.floor(mins / 60)).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0') + ' · Living block');
 }
+// Right mouse: aim down sights. Most guns barely zoom; the sniper rifle, or a gun with a scope fitted, zooms much further.
+function zoomOf(k) { const W = WEAPONS[k]; if (!W || W.melee) return 1; return G.scoped[k] ? 2.6 : (W.zoom || 1.2); }
+function adsSpread(k) { const W = WEAPONS[k]; return G.scoped[k] ? 0.3 : (W.ads || 0.7); }
+function isScoped(k) { return !!(WEAPONS[k] && (WEAPONS[k].scope || G.scoped[k])); }
+function fitScope() {
+  const cur = G.weapons[G.cur]; const k = ['pistol', 'smg'].includes(cur) && !G.scoped[cur] ? cur : ['pistol', 'smg'].find((w) => G.weapons.includes(w) && !G.scoped[w]);
+  if (!k) return false; G.scoped[k] = true; gunProps[k].userData.scopeMesh.visible = true; msg('Scope fitted to the ' + WEAPONS[k].name + '. Hold right mouse to look through it.', 'good'); return true;
+}
+function setSneak(v) { player.sneak = v; document.body.classList.toggle('sneak', v); }
 function setWeapon(i) {
   if (i < 0 || i >= G.weapons.length) return; G.cur = i; G.reloadT = 0;
   const k = G.weapons[i]; for (const [n, g] of Object.entries(gunProps)) g.visible = n === k;
@@ -860,16 +1169,18 @@ function noise(pos, radius) {
     if (!a.alive || a === player) continue; const d = a.pos.distanceTo(pos); if (d > radius) continue;
     if (a.kind === 'civ' && !a.isHitman) panic(a);
     if (a.kind === 'civ' && a.isHitman && !a.revealed && d < radius * 0.6) a.susp = Math.max(a.susp, 75);
-    if (a.kind === 'goon' && d < radius * 0.9) a.aggro = true;
+    if (a.kind === 'goon' && d < radius * 0.9 && Math.abs(a.pos.y - pos.y) < 3) { if (!a.aggro) spotted(a, true); a.lastSeen = player.pos.clone(); }
+    if (a.rigType === 'yaki' && d < radius * 1.6) { a.aggro = true; a.lastSeen = player.pos.clone(); }
   }
 }
 function playerFire() {
   const k = G.weapons[G.cur], W = WEAPONS[k];
   if (W.melee) {
-    player.anim = 'punch'; player.punchT = 0.18; sfx('punch');
+    player.anim = 'punch'; player.punchT = 0.3; if (player.clip === 'Punch') player.actions.Punch.reset().play(); sfx('punch');
     const f = new V3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
     let hit = null, bd = 2.4;
     for (const a of actors) { if (a === player || !a.alive || !a.root.visible) continue; const v = a.pos.clone().sub(player.pos); v.y = 0; const d = v.length(); if (d < bd && v.normalize().dot(f) > 0.45) { bd = d; hit = a; } }
+    if (hit && hit.kind === 'goon' && !hit.aggro && hit.rigType !== 'yaki' && new V3(Math.sin(hit.yaw), 0, Math.cos(hit.yaw)).dot(f) > 0.3) { msg('Silent takedown: ' + (hit.boss ? 'Big Ma' : hit.name) + '.', 'good'); damage(hit, W.dmg * 5, player, false); G.fireCD = W.rate; return; }
     if (hit) { damage(hit, W.dmg, player, false); hit.pos.addScaledVector(f, 0.6); collide(hit); spark(hit.pos.clone().add(new V3(0, hit.h * 0.7, 0)), 0.6); }
     G.fireCD = W.rate; return;
   }
@@ -877,7 +1188,8 @@ function playerFire() {
   G.ammo[k]--; G.fireCD = W.rate;
   const aim = cameraAim(), m = muzzle();
   const moving = Math.hypot(player.vel.x, player.vel.z) > 3, air = !player.grounded;
-  const spread = W.spread * (moving ? 1.6 : 1) * (air ? 1.3 : 1);
+  const spread = W.spread * (moving ? 1.6 : 1) * (air ? 1.3 : 1) * (1 - G.adsK * (1 - adsSpread(k)));
+  G.shotT = 0;
   for (let i = 0; i < W.pellets; i++) {
     const d = aim.point.clone().sub(m).normalize(); d.x += (R() - 0.5) * 2 * spread; d.y += (R() - 0.5) * 2 * spread; d.z += (R() - 0.5) * 2 * spread; d.normalize();
     bulletTrace(m, d, W.dmg, player);
@@ -888,6 +1200,7 @@ function playerFire() {
 }
 function bulletTrace(o, d, dmg, src) {
   const tw = rayWorld(o, d, 140), ta = rayActors(o, d, tw, src);
+  if (ta.actor && ta.actor.dodgeT > 0 && R() < 0.65) { ta.actor = null; ta.t = tw; } // Wa slips the shot mid-dodge
   const t = ta.actor ? ta.t : tw, end = o.clone().addScaledVector(d, t);
   tracer(o, end, src === player ? 0xffe9a0 : 0xff9a7a);
   if (ta.actor) { const head = end.y > ta.actor.pos.y + hitHeight(ta.actor) * 0.83; damage(ta.actor, dmg * (head ? 2 : 1), src, head); spark(end, 0.35, 0.08); }
@@ -903,20 +1216,28 @@ function damage(a, amount, src, head) {
     else if (!a.isHitman && a.hp > 0 && src === player) { msg('Watch your fire. ' + a.name + ' is a regular.', 'bad'); panic(a); }
   }
   if (a.kind === 'goon') { a.aggro = true; if (!(a.windup > 0)) a.hitT = 0.3; }
+  if (a.kind === 'civ') a.hitT = 0.3;
+  if (a.rigType === 'yaki' && player.pos.y < ROOF_Y - 1 && a.hp > amount) { a.hideT = 5; a.aggro = true; } // shot from below: he ducks back from the edge
   if (a.hp <= 0) kill(a, src, head);
 }
 function kill(a, src, head) {
   a.alive = false; a.deadT = 0; a.anim = 'dead'; a.path = []; if (a.spot) { a.spot.taken = null; a.spot = null; }
   if (a.glint) a.glint.visible = false; if (a.bang) a.bang.visible = false;
+  if (a.laser) a.laser.visible = false;
+  if (a.rigType === 'yaki' && a.gun) { a.gun.visible = false; addPickup('rifle', a.pos.clone().add(new V3(0.8, 0, 0.5))); msg("Yaki dropped his sniper rifle.", ''); }
   if (src !== player) return;
   if (a.kind === 'civ' && !a.isHitman) { G.heat++; G.dom = Math.max(0, G.dom - 10); msg(a.name + ' was just a regular. The street saw that.', 'bad'); noise(a.pos, 30); }
   else if (a.isHitman) { G.dom += 25; msg((head ? 'Headshot. ' : '') + 'Hitman down: ' + a.name + '. +25', 'good'); }
-  else if (a.kind === 'goon') { G.dom += a.reward; msg((a.boss ? 'Big Ma is down. +' : 'Ma down. +') + a.reward, 'good'); }
+  else if (a.kind === 'goon') {
+    G.dom += a.reward;
+    const label = a.rigType === 'yaki' ? 'Yaki is down. +' : a.rigType === 'wa' ? 'Wa down. +' : a.boss ? 'Big Ma is down. +' : 'Ma down. +';
+    msg(label + a.reward, 'good');
+  }
   checkEnd();
 }
 function damagePlayer(n, from) {
   if (!player.alive || G.over) return;
-  player.hp -= n; G.lastHit = 0; player.flash = 0.8; $('#hurt').style.opacity = String(clamp(n / 25, 0.3, 0.9)); camShake = 0.25;
+  player.hp -= n; G.lastHit = 0; player.hitT = 0.25; player.flash = 0.8; $('#hurt').style.opacity = String(clamp(n / 25, 0.3, 0.9)); camShake = 0.25;
   if (player.hp <= 0) { player.hp = 0; player.alive = false; player.deadT = 0; endGame(false, 'Flatlined', 'You went down on Gai Fong Street. ' + (from ? from + ' got you.' : '')); }
 }
 function reveal(h) {
@@ -924,14 +1245,14 @@ function reveal(h) {
   h.revealed = true; h.gun.visible = true; h.bang.visible = true; h.bangT = 1.4; h.state = 'combat'; h.path = []; if (h.spot) { h.spot.taken = null; h.spot = null; }
   h.fireCD = 0.7; msg(h.name + ' is a hitman!', 'bad'); sfx('reveal', h.pos.distanceTo(player.pos)); noise(h.pos, 24);
 }
-function enemyFire(h) {
-  const g = h.gun, m = g.localToWorld(g.userData.muzzle.clone());
+function enemyFire(h, o = {}) {
+  const g = o.gun || h.gun, m = g.localToWorld(g.userData.muzzle.clone());
   const chest = player.pos.clone().add(new V3(0, (player.anim === 'prone' || player.anim === 'dive') ? 0.35 : 1.25, 0));
-  const d = chest.sub(m).normalize(); const sp = 0.035 + (Math.hypot(player.vel.x, player.vel.z) > 3 ? 0.03 : 0);
+  const d = chest.sub(m).normalize(); const sp = (o.spread ?? 0.035) + (Math.hypot(player.vel.x, player.vel.z) > 3 ? 0.03 : 0);
   d.x += (R() - 0.5) * 2 * sp; d.y += (R() - 0.5) * sp; d.z += (R() - 0.5) * 2 * sp; d.normalize();
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.55), new THREE.MeshBasicMaterial({ color: 0xffd060 }));
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.55), new THREE.MeshBasicMaterial({ color: o.color || 0xffd060 }));
   mesh.position.copy(m); mesh.lookAt(m.clone().add(d)); scene.add(mesh);
-  projectiles.push({ mesh, pos: m.clone(), vel: d.multiplyScalar(36), life: 3, dmg: 11, from: h.name });
+  projectiles.push({ mesh, pos: m.clone(), vel: d.multiplyScalar(o.speed || 36), life: 3, dmg: o.dmg || 11, from: h.name });
   spark(m, 0.45, 0.06); sfx('enemy', h.pos.distanceTo(player.pos));
 }
 function updateProjectiles(dtw) {
@@ -966,6 +1287,7 @@ function chooseActivity(c) {
 }
 const DUR = { stall: [18, 34], shop: [8, 16], table: [15, 30], bench: [12, 24], corner: [8, 20] };
 function panic(c) {
+  if (c.isChef) { c.scared = rr(6, 9); return; }
   if (!c.alive || c.state === 'panic' || c.state === 'inside') return;
   if (c.spot) { c.spot.taken = null; c.spot = null; }
   let best = null, bd = 1e9; for (const d of spots.door) { const dd = d.pos.distanceTo(c.pos) + (d.pos.distanceTo(player.pos) < c.pos.distanceTo(player.pos) ? 25 : 0); if (dd < bd) { bd = dd; best = d; } }
@@ -985,7 +1307,8 @@ function updateCivilian(c, dt) {
       }
       break;
     }
-    case 'do': c.anim = c.act === 'stall' ? 'eat' : 'idle'; c.animSpeed = lerp(c.animSpeed, 0, Math.min(1, dt * 6)); if (c.spot) c.yaw = turnTo(c.yaw, c.spot.face, dt * 5); c.t -= dt; if (c.t <= 0) chooseActivity(c); break;
+    case 'chef': c.animSpeed = 0; c.yaw = turnTo(c.yaw, Math.PI, dt * 4); if (c.scared > 0) { c.scared -= dt; c.label = 'Hiding behind the counter'; } else c.label = 'Cooking noodles'; return;
+    case 'do': c.anim = c.act === 'stall' ? 'eat' : c.act === 'table' ? 'chat' : 'idle'; c.animSpeed = lerp(c.animSpeed, 0, Math.min(1, dt * 6)); if (c.spot) c.yaw = turnTo(c.yaw, c.spot.face, dt * 5); c.t -= dt; if (c.t <= 0) chooseActivity(c); break;
     case 'panic': c.anim = 'walk'; if (followPath(c, 4.3, dt)) { c.state = 'inside'; c.root.visible = false; c.t = rr(25, 45); } break;
     case 'inside': c.t -= dt; if (c.t <= 0) { const d = pick(spots.door); c.pos.copy(d.pos); c.root.visible = true; c.state = 'idle'; c.t = 0.5; } break;
   }
@@ -1029,17 +1352,164 @@ function updateHitman(h, dt) {
   if (h.burst > 0 && see) { h.burstT -= dt; if (h.burstT <= 0) { enemyFire(h); h.burst--; h.burstT = 0.17; } }
   collide(h);
 }
+// Wa: big and lazy, swings a length of steel pipe. Lets the Ma charge first, but never stands still:
+// he circles, weaves on the way in, and side-steps when he sees your gun on him.
+function aimedAt(a) {
+  const k = G.weapons[G.cur]; if (WEAPONS[k].melee) return false;
+  camera.getWorldDirection(tmpD); const c = a.pos.clone().add(new V3(0, a.h * 0.55, 0)).sub(camera.position);
+  const along = c.dot(tmpD); if (along < 2) return false;
+  return c.addScaledVector(tmpD, -along).length() < 1.1 + along * 0.02;
+}
+function waDodge(g) {
+  const to = player.pos.clone().sub(g.pos).setY(0).normalize(), side = new V3(-to.z, 0, to.x);
+  let sgn = R() < 0.5 ? -1 : 1;
+  const tryDir = (s_) => { const e = g.pos.clone().addScaledVector(side, 3 * s_); return clearPath(g.pos.x, g.pos.z, e.x, e.z, 0.5); };
+  if (!tryDir(sgn)) sgn = -sgn; if (!tryDir(sgn)) return false;
+  g.dodgeDir = side.multiplyScalar(sgn).addScaledVector(to, -0.25).normalize(); g.dodgeT = 0.42; g.dodgeCD = rr(0.9, 1.7); g.clip = null;
+  const left = new V3(Math.cos(g.yaw), 0, -Math.sin(g.yaw)); g.dodgeSide = g.dodgeDir.dot(left) > 0 ? 1 : -1;
+  return true;
+}
+function updateWa(g, dt) {
+  if (!g.alive) return;
+  const d = g.pos.distanceTo(player.pos);
+  perceive(g, dt, 15);
+  if (g.lunge > 0) g.lunge -= dt;
+  const face = (k = 5) => { g.yaw = turnTo(g.yaw, Math.atan2(player.pos.x - g.pos.x, player.pos.z - g.pos.z), dt * k); };
+  if (!g.aggro || !player.alive) {
+    patrol(g, dt, 1.3); collide(g); return;
+  }
+  g.atkCD -= dt; g.dodgeCD -= dt;
+  // mid-dodge: a quick hop sideways
+  if (g.dodgeT > 0) {
+    g.dodgeT -= dt; g.pos.addScaledVector(g.dodgeDir, 7.2 * dt * (g.dodgeT > 0.12 ? 1 : 0.4)); g.animSpeed = 0; face(8); collide(g);
+    if (g.dodgeT <= 0) g.clip = null; return;
+  }
+  if (g.windup > 0) {
+    g.windup -= dt; g.animSpeed = 0; face();
+    if (g.windup <= 0) { g.lunge = 0.45; if (d < 3.1) { damagePlayer(g.dmg, 'Wa'); sfx('punch'); const push = player.pos.clone().sub(g.pos).setY(0).normalize(); player.vel.addScaledVector(push, 8); camShake = 0.45; } g.atkCD = 1.6; }
+    return;
+  }
+  const see = los(g, player);
+  // sees the gun on him (or hears it go off) and gets out of the line
+  const threatened = see && d < 30 && d > 2.2 && aimedAt(g);
+  if (threatened && g.dodgeCD <= 0 && (G.shotT < 0.12 ? R() < 0.8 : R() < dt * 2.4) && waDodge(g)) return;
+  if (d < 2.6 && g.atkCD <= 0 && g.lunge <= 0) { g.windup = 0.55; g.clip = null; return; }
+  let lead = Infinity;
+  for (const m of actors) if (m.rigType === 'ma' && m.alive && m.aggro) lead = Math.min(lead, m.pos.distanceTo(player.pos));
+  const hold = (lead < Infinity && d > 5) ? lead + 4 : 0;
+  g.strafeT -= dt; if (g.strafeT <= 0) { g.strafe = -g.strafe; g.strafeT = rr(1.4, 3); }
+  g.weave += dt;
+  const to = player.pos.clone().sub(g.pos).setY(0); to.y = 0; to.normalize(); const side = new V3(-to.z, 0, to.x);
+  if (hold) {
+    // circle at a distance while the Ma go in first
+    g.label = 'Circling, letting Ma go first';
+    const mv = side.clone().multiplyScalar(g.strafe).addScaledVector(to, clamp((d - hold) * 0.4, -1, 1));
+    const step = mv.normalize().multiplyScalar(2.0 * dt), e = g.pos.clone().add(step.clone().multiplyScalar(12));
+    if (!clearPath(g.pos.x, g.pos.z, e.x, e.z, 0.5)) g.strafe = -g.strafe;
+    g.pos.add(step); g.animSpeed = 2.0; face(6);
+  } else if (see && d < 16) {
+    // weave in: zig-zag so he is hard to line up
+    g.label = 'Weaving in with the pipe';
+    const mv = to.clone().addScaledVector(side, Math.sin(g.weave * 2.6) * 0.9 * g.strafe).normalize();
+    g.pos.addScaledVector(mv, 3.1 * dt); g.animSpeed = 3.1; face(7); g.path = [];
+  } else {
+    g.label = 'Lumbering in';
+    g.pathT -= dt; if (g.pathT <= 0 || !g.path.length) { g.path = findPath(g.pos, player.pos); g.pathT = 1.0; }
+    followPath(g, 2.8, dt);
+  }
+  collide(g);
+}
+
+// Yaki: the boss. Stays back, barks orders that send the crew in, sneaks to a covered spot with a clear line and takes shots.
+const YAKI_LINES = ['Yaki: "Get him, boys!"', 'Yaki: "Ma! Wa! Move in!"', 'Yaki: "Keep him off my roof!"', 'Yaki: "Surround him!"', 'Yaki: "What am I paying you for? Go!"'];
+function yakiAlert(y) {
+  if (!y.alive || y.alerted) return;
+  y.alerted = true; y.aggro = true; y.state = 'order'; y.t = 0; y.orderDone = false; y.act = 'order'; y.clip = null; y.path = [];
+}
+function giveOrders(y) {
+  msg(pick(YAKI_LINES), 'bad'); sfx('reveal', y.pos.distanceTo(player.pos));
+  for (const g of actors) if (g.kind === 'goon' && g !== y && g.alive && g.pos.distanceTo(y.pos) < 40) { if (!g.aggro) spotted(g, true); g.lastSeen = player.pos.clone(); g.pathT = 0; }
+  y.nextOrder = rr(14, 20);
+}
+function pickSpot(y) {
+  let best = null, bs = -1e9;
+  const tgt = new V3(player.pos.x, player.pos.y + 1.1, player.pos.z), onRoof = player.pos.y > ROOF_Y - 1;
+  for (const n of roofPts) {
+    const d = n.distanceTo(player.pos); if (d < (onRoof ? 9 : 6) || d > 60) continue;
+    const eye = new V3(n.x, n.y + 1.6, n.z), dir = tgt.clone().sub(eye), L = dir.length(); dir.divideScalar(L);
+    if (rayWorld(eye, dir, L) < L - 0.1) continue;
+    let cover = 0;
+    for (const s of solids) { if (s.h < 1) continue; const cx = clamp(n.x, s.minX, s.maxX), cz = clamp(n.z, s.minZ, s.maxZ); if (Math.hypot(n.x - cx, n.z - cz) < 2.5) { cover = 1; break; } }
+    const score = -Math.abs(d - 24) * 0.15 - n.distanceTo(y.pos) * 0.08 + R() * 1.5;
+    if (score > bs) { bs = score; best = n; }
+  }
+  return best ? best.clone() : null;
+}
+function updateYaki(y, dt) {
+  if (!y.alive) return;
+  y.pos.y = ROOF_Y;
+  const d = y.pos.distanceTo(player.pos), see = player.alive && los(y, player);
+  const face = (k = 6) => { y.yaw = turnTo(y.yaw, Math.atan2(player.pos.x - y.pos.x, player.pos.z - y.pos.z), dt * k); };
+  if (!y.alerted) {
+    perceive(y, dt, 46, 1.9);
+    y.label = 'Watching the yard from the roof'; y.sneak = false;
+    if (!y.path.length) { y.t -= dt; y.scan += dt; y.animSpeed = lerp(y.animSpeed, 0, Math.min(1, dt * 6)); if (!y.suspicious) y.yaw = turnTo(y.yaw, Math.sin(y.scan * 0.5) * 0.9, dt * 1.5); else y.yaw = turnTo(y.yaw, Math.atan2(player.pos.x - y.pos.x, player.pos.z - y.pos.z), dt * 3);
+      if (y.t <= 0) { y.ri = (y.ri + 1) % 4; y.path = [roofPts[y.ri].clone()]; y.t = rr(4, 7); } }
+    else followPath(y, 1.2, dt);
+    if (y.aggro) yakiAlert(y);
+    return;
+  }
+  if (!player.alive) { y.act = null; y.animSpeed = 0; if (y.laser) y.laser.visible = false; return; }
+  perceive(y, dt, 60, 6.3);
+  if (y.hideT > 0) {
+    y.hideT -= dt; y.act = null; y.sneak = true; y.label = 'Ducking back from the edge'; if (y.laser) y.laser.visible = false;
+    const hp_ = [roofPts[5], roofPts[6]].sort((a, b) => b.distanceTo(player.pos) - a.distanceTo(player.pos))[0];
+    if (!y.path.length || y.path[y.path.length - 1].distanceTo(hp_) > 0.5) y.path = [hp_.clone()];
+    followPath(y, 3.0, dt); collide(y); if (y.hideT <= 0) { y.state = 'move'; y.spotPos = null; y.repath = 0; } return;
+  }
+  y.nextOrder -= dt;
+  if (y.state !== 'order' && y.nextOrder <= 0 && actors.some((g) => g.kind === 'goon' && g !== y && g.alive)) { y.state = 'order'; y.t = 0; y.orderDone = false; y.act = 'order'; y.clip = null; y.path = []; }
+  if (y.state === 'order') {
+    y.animSpeed = 0; y.label = 'Giving orders'; face(); y.t += dt;
+    if (!y.orderDone && y.t > 0.45) { y.orderDone = true; giveOrders(y); }
+    if (y.t > 1.6) { y.state = 'move'; y.act = null; y.spotPos = null; y.repath = 0; }
+  } else if (y.state === 'move') {
+    y.act = null; y.repath -= dt;
+    if (!y.spotPos || y.repath <= 0) {
+      y.spotPos = pickSpot(y);
+      if (!y.spotPos) { let bd = 1e9; for (const n of roofPts) { const dd = Math.hypot(n.x - player.pos.x, n.z - player.pos.z); if (dd > 6 && dd < bd) { bd = dd; y.spotPos = n.clone(); } } }
+      y.path = y.spotPos ? [y.spotPos.clone()] : []; y.repath = 5;
+    }
+    const flee = d < 8; y.sneak = !flee; y.label = flee ? 'Backing off' : 'Sneaking into position';
+    const arrived = followPath(y, flee ? 3.3 : 2.1, dt);
+    if (arrived) { if (see && d >= 8) { y.state = 'aim'; y.t = 0; y.cd = 0.2; y.shots = 1 + Math.floor(R() * 2); y.lostT = 0; } else { y.spotPos = null; y.repath = 0; } }
+  } else if (y.state === 'aim') {
+    y.animSpeed = lerp(y.animSpeed, 0, Math.min(1, dt * 8)); face(8); y.t += dt; y.cd -= dt;
+    if (y.shootT > 0) { y.shootT -= dt; y.act = 'shoot'; } else y.act = 'aim';
+    y.label = 'Lining up a shot';
+    if (!see) { y.lostT += dt; if (y.lostT > 1.2) { y.state = 'move'; y.spotPos = null; y.repath = 0; } }
+    else y.lostT = 0;
+    if (d < 8 || y.shots <= 0) { y.state = 'move'; y.spotPos = null; y.repath = 0; }
+    else if (see && y.t > 1.35 && y.cd <= 0) {
+      enemyFire(y, { gun: y.gun, dmg: 42, spread: 0.006, speed: 95, color: 0xff5a3a }); sfx('sniper', d);
+      y.shootT = 0.3; y.clip = null; y.shots--; y.cd = rr(2.2, 3.0); y.t = 0.4;
+    }
+  }
+  // the rifle's laser shows where he is lining up: your warning to move
+  if (y.laser) {
+    const on = y.alive && y.state === 'aim' && see && y.shootT <= 0;
+    y.laser.visible = on;
+    if (on) { const m = y.gun.localToWorld(y.gun.userData.muzzle.clone()), tg = player.pos.clone().add(new V3(0, 1.2, 0)); const pa = y.laser.geometry.attributes.position; pa.setXYZ(0, m.x, m.y, m.z); pa.setXYZ(1, tg.x, tg.y, tg.z); pa.needsUpdate = true; y.laser.material.opacity = 0.25 + 0.5 * clamp((y.t - 0.4) / 0.95, 0, 1); }
+  }
+  collide(y);
+}
+
 function updateGoon(g, dt) {
   if (!g.alive) return;
   const d = g.pos.distanceTo(player.pos);
-  if (!g.aggro && player.alive && d < 12 && los(g, player)) { g.aggro = true; sfx('goon', d); }
+  perceive(g, dt, g.boss ? 15 : 17);
   if (g.lunge > 0) g.lunge -= dt;
-  if (!g.aggro || !player.alive) {
-    g.label = g.boss ? 'Minding the yard' : 'Loitering';
-    if (!g.path.length) { g.t -= dt; g.anim = 'idle'; g.animSpeed = lerp(g.animSpeed, 0, Math.min(1, dt * 6)); if (g.t <= 0) { g.path = findPath(g.pos, pick(yardPts).clone().add(new V3(rr(-2, 2), 0, rr(-2, 2)))); g.t = rr(1, 4); } }
-    else followPath(g, 1.8, dt);
-    collide(g); return;
-  }
+  if (!g.aggro || !player.alive) { patrol(g, dt, g.boss ? 1.5 : 1.8); collide(g); return; }
   g.label = 'Coming for you';
   g.atkCD -= dt;
   if (g.windup > 0) { g.windup -= dt; g.animSpeed = 0; g.yaw = turnTo(g.yaw, Math.atan2(player.pos.x - g.pos.x, player.pos.z - g.pos.z), dt * 8); if (g.windup <= 0) { g.lunge = 0.25; const reach = g.boss ? 2.6 : 1.9; if (d < reach) { damagePlayer(g.dmg, g.name); sfx('punch'); const push = player.pos.clone().sub(g.pos).setY(0).normalize(); player.vel.addScaledVector(push, g.boss ? 9 : 5); } g.atkCD = g.boss ? 1.6 : 1.15; } return; }
@@ -1059,7 +1529,8 @@ function updatePlayer(dt) {
   const f = new V3(Math.sin(camYaw), 0, Math.cos(camYaw)), right = new V3(-Math.cos(camYaw), 0, Math.sin(camYaw));
   const ix = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0), iz = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
   const wish = f.clone().multiplyScalar(iz).addScaledVector(right, ix); if (wish.lengthSq() > 0) wish.normalize();
-  const speed = 5.2 * (1 - 0.095 * w) * (keys.ShiftLeft || keys.ShiftRight ? 1.45 : 1);
+  if (p.sneak && (keys.ShiftLeft || keys.ShiftRight || p.state !== 'normal')) setSneak(false);
+  const speed = 5.2 * (1 - 0.095 * w) * (keys.ShiftLeft || keys.ShiftRight ? 1.45 : 1) * (1 - 0.4 * G.adsK) * (p.sneak ? 0.42 : 1);
   if (p.state === 'normal') {
     const k = Math.min(1, dt * (p.grounded ? 12 : 3));
     p.vel.x = lerp(p.vel.x, wish.x * speed, k); p.vel.z = lerp(p.vel.z, wish.z * speed, k);
@@ -1069,17 +1540,26 @@ function updatePlayer(dt) {
       const dir = wish.lengthSq() > 0 ? wish.clone() : f.clone();
       p.vel.set(dir.x * 9.6, 0, dir.z * 9.6); p.vy = 3.6; p.grounded = false; p.state = 'dive'; p.anim = 'dive'; p.yaw = Math.atan2(dir.x, dir.z); G.stunt -= stuntCost(); sfx('punch');
     } else if (p.diveReq && G.stunt < stuntCost()) msg('Too heavy to dive right now. Drop a weapon with G or wait.', '');
-    if (p.jumpReq && p.grounded) { p.vy = 5.4; p.grounded = false; }
+    if (p.jumpReq && p.grounded) { p.vy = 5.4; p.grounded = false; if (p.sneak) setSneak(false); }
   } else if (p.state === 'dive') { p.anim = 'dive'; }
   else if (p.state === 'prone') { p.anim = 'prone'; p.vel.multiplyScalar(Math.max(0, 1 - dt * 6)); p.proneT -= dt; if (p.proneT <= 0) { p.state = 'normal'; } }
   p.diveReq = false; p.jumpReq = false;
   if (p.punchT > 0) p.punchT -= dt;
   p.vy -= 16 * dt; p.pos.x += p.vel.x * dt; p.pos.z += p.vel.z * dt; p.pos.y += p.vy * dt;
-  if (p.pos.y <= 0) { p.pos.y = 0; if (p.vy < 0) p.vy = 0; if (!p.grounded && p.state === 'dive') { p.state = 'prone'; p.proneT = 0.55; } p.grounded = true; }
   collide(p);
+  const gh = groundAt(p.pos.x, p.pos.z, p.pos.y);
+  if (p.pos.y <= gh + 0.001) { p.pos.y = gh; if (p.vy < 0) p.vy = 0; if (!p.grounded && p.state === 'dive') { p.state = 'prone'; p.proneT = 0.55; } p.grounded = true; }
+  else if (p.grounded && p.vy <= 0 && p.pos.y - gh < 0.4) { p.pos.y = gh; p.vy = 0; }
+  else p.grounded = false;
+  // the roof stairs door
+  G.lockMsgT -= dt;
+  if (!stairDoor.open && Math.hypot(p.pos.x - stairDoor.x, p.pos.z - stairDoor.z) < 2.1) {
+    if (G.hasKey) openStairs(); else if (G.lockMsgT <= 0) { msg('Locked. The key for the roof stairs is in the breakroom, back of the main godown.', 'bad'); G.lockMsgT = 5; }
+  }
+  if (stairDoor.open && stairDoor.k < 1) { stairDoor.k = Math.min(1, stairDoor.k + dt * 2); stairDoor.pivot.rotation.y = 1.7 * (1 - (1 - stairDoor.k) ** 2); }
   p.animSpeed = Math.hypot(p.vel.x, p.vel.z);
   // weapons
-  G.fireCD -= dt;
+  G.fireCD -= dt; G.shotT += dt;
   if (G.reloadT > 0) { G.reloadT -= dt; if (G.reloadT <= 0) { const k = G.weapons[G.cur]; G.ammo[k] = WEAPONS[k].mag; } }
   if (mouseDown && G.fireCD <= 0 && G.reloadT <= 0 && (W.auto || !G.trigger)) playerFire();
   G.trigger = mouseDown;
@@ -1089,9 +1569,11 @@ function updatePlayer(dt) {
   for (const pk of pickups) {
     pk.cd -= dt; pk.mesh.rotation.y += dt * 1.5;
     if (pk.cd <= 0 && pk.mesh.parent && pk.mesh.position.distanceTo(p.pos) < 1.3) {
+      if (pk.kind === 'key') { G.hasKey = true; scene.remove(pk.mesh); msg('Got the stair key. The roof stairs are at the east end of the main godown.', 'good'); continue; }
+      if (pk.kind === 'scope') { if (fitScope()) scene.remove(pk.mesh); else { msg('A scope. You need a Beretta or MP5K to mount it on.'); pk.cd = 3; } continue; }
       if (G.weapons.includes(pk.kind)) { G.ammo[pk.kind] = WEAPONS[pk.kind].mag; }
       else { G.weapons.push(pk.kind); G.ammo[pk.kind] = WEAPONS[pk.kind].mag; setWeapon(G.weapons.length - 1); }
-      msg('Picked up ' + WEAPONS[pk.kind].name + '. Weight ' + weight().toFixed(1)); scene.remove(pk.mesh);
+      msg('Picked up ' + WEAPONS[pk.kind].name + '. Weight ' + weight().toFixed(1) + (pk.kind === 'rifle' ? '. Hold right mouse to scope in.' : '')); scene.remove(pk.mesh);
     }
   }
   G.lastHit += dt; if (G.lastHit > 6 && p.hp < 100) p.hp = Math.min(100, p.hp + dt * 4);
@@ -1110,12 +1592,18 @@ function updateCamera(dt) {
   camPitch = clamp(camPitch, -0.55, 0.95);
   const right = new V3(-Math.cos(camYaw), 0, Math.sin(camYaw));
   const dir = new V3(Math.sin(camYaw) * Math.cos(camPitch), -Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
-  const pv = player.pos.clone().add(new V3(0, player.anim === 'prone' ? 0.9 : 1.7, 0)).addScaledVector(right, 0.75);
-  const back = dir.clone().negate(); let dist = 4.3; const hit = rayWorld(pv, back, dist + 0.3); if (hit < dist + 0.3) dist = Math.max(0.6, hit - 0.3);
+  const pv = player.pos.clone().add(new V3(0, player.anim === 'prone' ? 0.9 : player.sneak ? 1.3 : 1.7, 0)).addScaledVector(right, 0.75);
+  const wk = G && G.weapons[G.cur], wantAds = !!(G && rmb && player.alive && player.state === 'normal' && zoomOf(wk) > 1.01);
+  if (G) G.adsK = lerp(G.adsK, wantAds ? 1 : 0, Math.min(1, dt * 12));
+  const ak = G ? G.adsK : 0, scoped = G && isScoped(wk) && ak > 0.85;
+  pv.addScaledVector(right, -0.2 * ak);
+  const back = dir.clone().negate(); let dist = lerp(4.3, isScoped(wk) ? 0.9 : 2.4, ak); const hit = rayWorld(pv, back, dist + 0.3); if (hit < dist + 0.3) dist = Math.max(0.6, hit - 0.3);
   camera.position.copy(pv).addScaledVector(back, dist);
   if (camShake > 0) { camShake -= dt; camera.position.x += (R() - 0.5) * camShake * 0.4; camera.position.y += (R() - 0.5) * camShake * 0.4; }
   camera.lookAt(pv.clone().add(dir));
-  const fov = G && G.bt ? 56 : 62; if (Math.abs(camera.fov - fov) > 0.05) { camera.fov = lerp(camera.fov, fov, Math.min(1, dt * 6)); camera.updateProjectionMatrix(); }
+  const zf = G ? lerp(1, zoomOf(wk), ak) : 1; const fov = (G && G.bt ? 56 : 62) / zf;
+  if (Math.abs(camera.fov - fov) > 0.05) { camera.fov = lerp(camera.fov, fov, Math.min(1, dt * 14)); camera.updateProjectionMatrix(); }
+  if (G) { const sc = $('#scope'); if (sc.classList.contains('on') !== !!scoped) { sc.classList.toggle('on', !!scoped); document.body.classList.toggle('scoped', !!scoped); } player.body.visible = !scoped; $('#xh').classList.toggle('ads', ak > 0.5); }
 }
 
 // ---------------------------------------------------------------- target label
@@ -1134,16 +1622,17 @@ function updateTarget(dt) {
 
 // ---------------------------------------------------------------- minimap
 const mini = $('#mini'), mg = mini.getContext('2d'); let miniBase = null;
-const MX = (x) => (x + 66) / 132 * 176, MZ = (z) => (z + 64) / 92 * 132;
+const MX = (x) => (x + 66) / 132 * 176, MZ = (z) => (z + 112) / 140 * 186;
 function drawMiniBase() {
-  miniBase = makeCanvas(176, 132); const g = miniBase.getContext('2d');
-  g.fillStyle = 'rgba(28,18,48,.92)'; g.fillRect(0, 0, 176, 132);
+  miniBase = makeCanvas(176, 186); const g = miniBase.getContext('2d');
+  g.fillStyle = 'rgba(28,18,48,.92)'; g.fillRect(0, 0, 176, 186);
   g.fillStyle = '#3a2f4e'; g.fillRect(MX(-64), MZ(-9), MX(64) - MX(-64), MZ(9) - MZ(-9));
   g.fillStyle = '#5a2f34'; g.fillRect(MX(-18), MZ(9), MX(2) - MX(-18), MZ(26) - MZ(9));
-  g.fillStyle = '#3d3a45'; g.fillRect(MX(-30), MZ(-62), MX(44) - MX(-30), MZ(-30) - MZ(-62)); g.fillRect(MX(8), MZ(-30), MX(16) - MX(8), MZ(-9) - MZ(-30));
-  g.fillStyle = '#0b0710'; for (const s of solids) if (s.h > 1.5) g.fillRect(MX(s.minX), MZ(s.minZ), Math.max(1, MX(s.maxX) - MX(s.minX)), Math.max(1, MZ(s.maxZ) - MZ(s.minZ)));
+  g.fillStyle = '#3d3a45'; g.fillRect(MX(-30), MZ(-108), MX(44) - MX(-30), MZ(-30) - MZ(-108)); g.fillRect(MX(8), MZ(-30), MX(16) - MX(8), MZ(-9) - MZ(-30));
+  g.fillStyle = '#2b2636'; for (const s of solids) if (s.y0 > 6) g.fillRect(MX(s.minX), MZ(s.minZ), Math.max(1, MX(s.maxX) - MX(s.minX)), Math.max(1, MZ(s.maxZ) - MZ(s.minZ)));
+  g.fillStyle = '#0b0710'; for (const s of solids) if (s.h > 1.5 && !(s.y0 > 2)) g.fillRect(MX(s.minX), MZ(s.minZ), Math.max(1, MX(s.maxX) - MX(s.minX)), Math.max(1, MZ(s.maxZ) - MZ(s.minZ)));
   g.fillStyle = '#d4202f'; g.fillRect(MX(-11), MZ(17.6), MX(-5) - MX(-11), 4);
-  g.font = '700 9px "Barlow Condensed", sans-serif'; g.fillStyle = '#b9a9cf'; g.fillText('YARD', MX(-4), MZ(-44)); g.fillText('PLAZA', MX(-14), MZ(15));
+  g.font = '700 9px "Barlow Condensed", sans-serif'; g.fillStyle = '#b9a9cf'; g.fillText('YARD', MX(-4), MZ(-44)); g.fillText('GODOWN 1', MX(-25), MZ(-73)); g.fillText('GODOWN 2', MX(15), MZ(-73)); g.fillText('YEE KEE', MX(-2), MZ(-99)); g.fillStyle = '#ffc23a'; g.fillRect(MX(29.4), MZ(-106.5), 3, 4); g.fillText('PLAZA', MX(-14), MZ(15));
 }
 function drawMini() {
   if (!miniBase) drawMiniBase(); mg.drawImage(miniBase, 0, 0);
@@ -1171,7 +1660,7 @@ function sfx(kind, dist = 0) {
   if (!AC || muted) return;
   const t = AC.currentTime, slow = G && G.bt ? 2.2 : 1;
   if (kind === 'reveal') { const o = AC.createOscillator(), g = AC.createGain(); o.type = 'square'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(110, t + 0.4); g.gain.setValueAtTime(0.12 / (1 + dist / 20), t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.45); o.connect(g).connect(master); o.start(t); o.stop(t + 0.5); return; }
-  const P = { pistol: [0.12, 1900, 0.9, 1], smg: [0.07, 2300, 0.7, 1.1], shotgun: [0.3, 900, 1.1, 0.8], enemy: [0.1, 1500, 0.7, 1.05], punch: [0.07, 500, 0.7, 1], hit: [0.05, 3200, 0.35, 1.4], goon: [0.14, 700, 0.5, 0.6] }[kind];
+  const P = { pistol: [0.12, 1900, 0.9, 1], smg: [0.07, 2300, 0.7, 1.1], shotgun: [0.3, 900, 1.1, 0.8], enemy: [0.1, 1500, 0.7, 1.05], sniper: [0.32, 2600, 1.1, 0.7], rifle: [0.32, 2600, 1.1, 0.7], punch: [0.07, 500, 0.7, 1], hit: [0.05, 3200, 0.35, 1.4], goon: [0.14, 700, 0.5, 0.6] }[kind];
   if (!P) return; const [dur, freq, vol, rate] = P;
   const s = AC.createBufferSource(); s.buffer = noiseBuf; s.playbackRate.value = rate / (slow > 1 ? 1.8 : 1);
   const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(freq, t); fl.frequency.exponentialRampToValueAtTime(Math.max(80, freq * 0.15), t + dur * slow);
@@ -1183,7 +1672,8 @@ function sfx(kind, dist = 0) {
 function checkEnd() {
   if (G.over) return;
   if (G.heat >= 3) return endGame(false, 'The street turned on you', 'Three regulars down by your hand. Nobody on Gai Fong Street will serve you noodles again.');
-  if (G.dom >= 100) return endGame(true, 'You run this block', 'The hitmen are gone and the yard is quiet. Tomorrow the regulars will nod when you pass the stall.');
+  const yaki = actors.find((a) => a.rigType === 'yaki');
+  if (yaki && !yaki.alive) return endGame(true, 'You took the roof', 'Yaki is down and the Yee Kee godown is quiet. Dominance ' + Math.round(G.dom) + '. Tomorrow the regulars will nod when you pass the stall.');
 }
 function endGame(won, title, text) {
   G.over = true; setTimeout(() => { mode = 'end'; $('#endTitle').textContent = title; $('#endText').textContent = text; $('#ovEnd').hidden = false; if (document.pointerLockElement) document.exitPointerLock(); }, won ? 900 : 1400);
@@ -1197,11 +1687,12 @@ addEventListener('keydown', (e) => {
   if (e.repeat) return;
   if (e.code === 'Space') player.jumpReq = true;
   if (e.code === 'KeyC') player.diveReq = true;
+  if (e.code === 'KeyZ' && player.state === 'normal') setSneak(!player.sneak);
   if (e.code === 'KeyR') startReload();
   if (e.code === 'KeyG') dropWeapon();
   if (e.code === 'KeyM') { muted = !muted; if (master) master.gain.value = muted ? 0 : 0.45; msg(muted ? 'Sound off' : 'Sound on'); }
   if (e.code === 'KeyQ') { if (G.bt) G.bt = false; else if (G.btMeter > 15) G.bt = true; document.body.classList.toggle('bt', G.bt); }
-  if (e.code.startsWith('Digit')) setWeapon(+e.code.slice(5) - 1);
+  if (e.code.startsWith('Digit')) { const i = +e.code.slice(5) - 1; if (i < G.weapons.length) { setWeapon(i); showStrip(); } }
   if (e.code === 'Escape' && !locked) pause();
 });
 addEventListener('keyup', (e) => { keys[e.code] = false; });
@@ -1216,9 +1707,22 @@ canvas.addEventListener('mousedown', (e) => {
 addEventListener('mouseup', (e) => { if (e.button === 0) mouseDown = false; if (e.button === 2) rmb = false; });
 addEventListener('mousemove', (e) => {
   if (mode !== 'playing') return;
-  if (locked || rmb) { camYaw -= e.movementX * 0.0024; camPitch += e.movementY * 0.0022; }
+  if (locked || (rmb && lockFailed)) { const zs = G ? 1 / lerp(1, zoomOf(G.weapons[G.cur]), G.adsK) : 1; camYaw -= e.movementX * 0.0024 * zs; camPitch += e.movementY * 0.0022 * zs; }
 });
-addEventListener('wheel', (e) => { if (mode !== 'playing') return; const n = G.weapons.length; setWeapon(((G.cur + (e.deltaY > 0 ? 1 : -1)) % n + n) % n); }, { passive: true });
+// Scroll wheel: one notch = one weapon. Trackpads send small deltas, so those accumulate.
+let wheelAcc = 0, wheelLast = 0, stripT = 0;
+function cycleWeapon(dir) { const n = G.weapons.length; if (n < 2) return; setWeapon(((G.cur + dir) % n + n) % n); showStrip(); }
+function showStrip() {
+  const el = $('#wstrip'); el.innerHTML = G.weapons.map((k, i) => `<div class="${i === G.cur ? 'cur' : ''}"><b>${i + 1}</b>${WEAPONS[k].name}</div>`).join('');
+  el.classList.add('on'); clearTimeout(stripT); stripT = setTimeout(() => el.classList.remove('on'), 1100);
+}
+addEventListener('wheel', (e) => {
+  if (mode !== 'playing' || !G) return;
+  const now = performance.now(); if (now - wheelLast > 250) wheelAcc = 0; wheelLast = now;
+  const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 400 : e.deltaY;
+  if (Math.abs(dy) >= 40) { wheelAcc = 0; cycleWeapon(dy > 0 ? 1 : -1); return; }
+  wheelAcc += dy; if (Math.abs(wheelAcc) >= 60) { cycleWeapon(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
+}, { passive: true });
 function requestLock() {
   try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { lockFailed = true; $('#lockhint').hidden = false; }); }
   catch (e) { lockFailed = true; $('#lockhint').hidden = false; }
@@ -1246,8 +1750,8 @@ function frame(now) {
     const dtw = dt * (G.bt ? 0.22 : 1), dtp = dt * (G.bt ? 0.6 : 1);
     G.clock += dtw;
     updatePlayer(dtp);
-    for (const a of actors) { if (a.kind === 'civ') updateCivilian(a, dtw); else if (a.kind === 'goon') updateGoon(a, dtw); }
-    for (const a of actors) if (a.kind === 'civ' && a.alive) collide(a);
+    for (const a of actors) { if (a.kind === 'civ') updateCivilian(a, dtw); else if (a.kind === 'goon') (a.rigType === 'wa' ? updateWa : a.rigType === 'yaki' ? updateYaki : updateGoon)(a, dtw); }
+    for (const a of actors) if (a.kind === 'civ' && a.alive && !a.isChef) collide(a);
     separate(dtw);
     updateProjectiles(dtw);
     updateFx(dtw);
@@ -1274,10 +1778,14 @@ async function boot() {
   const note = $('#loadNote');
   try {
     await Promise.all([
-      loadTemplate('guard', 'models/Guard.json', 1.98, 0.022),
-      loadTemplate('glasses', 'models/Glasses.json', 1.78, 0.02),
+      loadRigged('guard', 'models/Guard.json', 1.0, 0.011),
+      loadRigged('glasses', 'models/Glasses.json', 1.0, 0.011),
+      loadRigged('nestor', 'models/MrNestor.json', 1.0, 0.011),
+      loadRigged('chef', 'models/Chef.json', 1.0, 0.011),
       loadRigged('ma', 'models/Ma.json', 1.0, 0.016),
       loadRigged('maBig', 'models/MaBig.json', 1.0, 0.014),
+      loadRigged('wa', 'models/Wa.json', 1.0, 0.011),
+      loadRigged('yaki', 'models/Yaki.json', 1.0, 0.012),
     ]);
   } catch (e) { note.textContent = 'A character model failed to load (' + (e && e.message ? e.message : e) + '). Reload the page to try again.'; return; }
   newRun();
@@ -1285,7 +1793,5 @@ async function boot() {
   note.textContent = matchMedia('(pointer: coarse)').matches ? 'This prototype needs a keyboard and mouse.' : 'Click in the street to lock the mouse. Esc pauses.';
 }
 boot();
-window.__regulars = { info: () => ({ mode, dom: G && G.dom, heat: G && G.heat, hp: player && player.hp, pos: player && player.pos.toArray().map((v) => +v.toFixed(2)), actors: actors.map((a) => ({ k: a.kind, h: !!a.isHitman, s: a.state, alive: a.alive, vis: a.root.visible, p: [+a.pos.x.toFixed(1), +a.pos.z.toFixed(1)], label: a.label, susp: a.susp && +a.susp.toFixed(0), rev: !!a.revealed, aggro: !!a.aggro, clip: a.clip })) }), aimAt: (i) => { const a = actors[i]; if (!a) return; camYaw = Math.atan2(a.pos.x - player.pos.x, a.pos.z - player.pos.z); camPitch = 0.05; }, teleport: (x, z) => { player.pos.set(x, 0, z); } };
+window.__regulars = { info: () => ({ mode, dom: G && G.dom, heat: G && G.heat, hp: player && player.hp, pos: player && player.pos.toArray().map((v) => +v.toFixed(2)), actors: actors.map((a) => ({ k: a.kind, h: !!a.isHitman, s: a.state, alive: a.alive, vis: a.root.visible, p: [+a.pos.x.toFixed(1), +a.pos.z.toFixed(1)], label: a.label, susp: a.susp && +a.susp.toFixed(0), rev: !!a.revealed, aggro: !!a.aggro, clip: a.clip, r: a.rigType, st: a.state, hp: Math.round(a.hp) })) }), aimAt: (i) => { const a = actors[i]; if (!a) return; camYaw = Math.atan2(a.pos.x - player.pos.x, a.pos.z - player.pos.z); camPitch = 0.05; }, teleport: (x, z, y = 0) => { player.pos.set(x, y, z); }, give: (k) => { if (k === 'scope') return fitScope(); if (!G.weapons.includes(k)) { G.weapons.push(k); G.ammo[k] = WEAPONS[k].mag; } setWeapon(G.weapons.indexOf(k)); }, ads: (v) => { rmb = v; }, actor: (i) => actors[i], look: (i, yaw, dist, clip, t) => { mode = 'frozen'; const a = actors[i]; if (clip) { a.mixer.stopAllAction(); const ac = a.actions[clip]; ac.reset().play(); ac.time = t; a.mixer.update(0); a.root.updateMatrixWorld(true); } camera.position.set(a.pos.x + Math.sin(a.yaw + yaw) * dist, 1.5, a.pos.z + Math.cos(a.yaw + yaw) * dist); camera.lookAt(a.pos.x, 1.2, a.pos.z); camera.fov = 45; camera.updateProjectionMatrix(); }, setCam: (y, p) => { camYaw = y; camPitch = p; }, spin: (d) => { mode = "frozen"; player.root.rotation.y += d; } };
 </script>
-
-</body></html>
