@@ -518,7 +518,9 @@ function buildWorld() {
   const skyMat = [0, 1, 2, 3, 4].map((pi) => { const f = facade(pi); const m = f.map.clone(); m.repeat.set(2, 6); m.needsUpdate = true; const e = f.em.clone(); e.repeat.set(2, 6); e.needsUpdate = true; return toon({ map: m, emissive: 0xffffff, emissiveMap: e, color: 0x8f86b0 }); });
   for (let i = 0; i < 46; i++) {
     const a = i / 46 * Math.PI * 2 + srnd() * 0.1, r = 120 + srnd() * 50, w = 14 + srnd() * 14, h = 35 + srnd() * 70;
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), spick(skyMat)); m.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r * 0.85 - 10); world.add(m);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), spick(skyMat)); let tx = Math.cos(a) * r, tz = Math.sin(a) * r * 0.85 - 10;
+    if (tx > -60 - w / 2 && tx < 70 + w / 2 && tz < -20 && tz + w / 2 > -132) tz = -132 - w / 2; // stay behind the compound
+    m.position.set(tx, h / 2, tz); world.add(m);
   }
   const moonC = makeCanvas(256, 256), mg = moonC.getContext('2d'); const gr = mg.createRadialGradient(128, 128, 40, 128, 128, 128); gr.addColorStop(0, 'rgba(255,236,200,1)'); gr.addColorStop(0.42, 'rgba(255,220,170,1)'); gr.addColorStop(0.5, 'rgba(255,200,150,.25)'); gr.addColorStop(1, 'rgba(255,200,150,0)'); mg.fillStyle = gr; mg.fillRect(0, 0, 256, 256);
   const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: texFrom(moonC), fog: false, depthWrite: false })); moon.position.set(140, 120, -220); moon.scale.setScalar(60); scene.add(moon);
@@ -607,9 +609,17 @@ function buildCompound() {
   const piv = new THREE.Group(); piv.position.set(29.75, 0, -106.5); world.add(piv); stairDoor.pivot = piv;
   boxMesh(0.12, 2.55, 1.7, toon({ color: 0xa8281e }), 0, 1.28, 0.85, 0.03, piv); boxMesh(0.2, 0.3, 0.22, toon({ color: 0xe0b030 }), 0.12, 1.15, 1.45, 0.02, piv);
   signPlane('樓梯 · 天台', 'ROOF STAIRS · LOCKED', 1.9, 0.6, '#c41e2e', '#f4ead8', 29.45, 3.0, -105.65, -Math.PI / 2);
-  ramps.push({ minX: 30.2, maxX: 39.5, minZ: -107.5, maxZ: -104.6, y0: 0, y1: ROOF_Y });
+  const RX0 = 30.4, RX1 = 37.9;
+  ramps.push({ minX: RX0, maxX: 39.5, xTop: RX1 - 0.6, minZ: -107.5, maxZ: -104.6, y0: 0, y1: ROOF_Y }); // reaches roof height just before the landing
   const stepM = toon({ color: 0x6e6878 }), n = 16;
-  for (let i = 0; i < n; i++) { const x0 = 30.2 + (39.5 - 30.2) * i / n, x1 = 30.2 + (39.5 - 30.2) * (i + 1) / n, top = ROOF_Y * (i + 1) / n; boxMesh(x1 - x0, top, 2.9, stepM, (x0 + x1) / 2, top / 2, -106.05, 0.02); }
+  for (let i = 0; i < n; i++) {
+    const x0 = RX0 + (RX1 - RX0) * i / n, x1 = RX0 + (RX1 - RX0) * (i + 1) / n, top = ROOF_Y * (i + 1) / n;
+    boxMesh(x1 - x0, top, 2.9, stepM, (x0 + x1) / 2, top / 2, -106.05, 0.02);
+    if (top - 0.6 > 0.1) addSolid(x0, x1, -107.5, -104.6, top - 0.6); // the stair body: you can't walk into it from the side
+    if (i > 1) { addSolid(x0, x1, -104.66, -104.44, top + 0.9).y0 = top - 0.6; boxMesh(x1 - x0, 0.08, 0.08, toon({ color: 0xc41e2e }), (x0 + x1) / 2, top + 0.9, -104.55, 0.01); } // handrail
+  }
+  slab(RX1, 39.5, -107.5, -100.5, ROOF_Y - 0.4, ROOF_Y, stepM, 0.03); // landing at the top, leading onto the roof
+  boxMesh(0.08, 1.0, 7, toon({ color: 0xc41e2e }), RX1 - 0.04, ROOF_Y + 0.5, -104, 0.02); addSolid(RX1 - 0.1, RX1, -104.4, -100.5, ROOF_Y + 1).y0 = ROOF_Y; // rail on the stairwell side
   // the roof: parapet, plant, a big sign, and Yaki's perches
   const par = toon({ color: 0x4a4556 });
   slab(-26, 40, -92.5, -92, ROOF_Y, ROOF_Y + 0.8, par); slab(-26, 30, -108, -107.5, ROOF_Y, ROOF_Y + 0.8, par);
@@ -628,7 +638,7 @@ function buildCompound() {
 function groundAt(x, z, y) {
   let g = 0;
   for (const s of solids) if (s.h <= y + 0.55 && s.h > g && x >= s.minX && x <= s.maxX && z >= s.minZ && z <= s.maxZ) g = s.h;
-  for (const r of ramps) if (x >= r.minX - 0.2 && x <= r.maxX && z >= r.minZ && z <= r.maxZ) { const h = r.y0 + (r.y1 - r.y0) * clamp((x - r.minX) / (r.maxX - r.minX), 0, 1); if (h <= y + 0.6 && h > g) g = h; }
+  for (const r of ramps) if (x >= r.minX - 0.2 && x <= r.maxX && z >= r.minZ && z <= r.maxZ) { const h = r.y0 + (r.y1 - r.y0) * clamp((x - r.minX) / ((r.xTop ?? r.maxX) - r.minX), 0, 1); if (h <= y + 0.6 && h > g) g = h; }
   return g;
 }
 function openStairs() {
@@ -959,7 +969,7 @@ function animateActor(a, dt) {
 function collide(a) {
   const r = a.radius;
   for (const s of solids) {
-    if (a.pos.y > s.h - 0.05 || (s.y0 && a.pos.y + 1.7 < s.y0)) continue;
+    if (a.pos.y > s.h - 0.45 || (s.y0 && a.pos.y + 1.7 < s.y0)) continue;
     const cx = clamp(a.pos.x, s.minX, s.maxX), cz = clamp(a.pos.z, s.minZ, s.maxZ);
     let dx = a.pos.x - cx, dz = a.pos.z - cz; const d2 = dx * dx + dz * dz;
     if (d2 < r * r) {
@@ -1793,5 +1803,8 @@ async function boot() {
   note.textContent = matchMedia('(pointer: coarse)').matches ? 'This prototype needs a keyboard and mouse.' : 'Click in the street to lock the mouse. Esc pauses.';
 }
 boot();
-window.__regulars = { info: () => ({ mode, dom: G && G.dom, heat: G && G.heat, hp: player && player.hp, pos: player && player.pos.toArray().map((v) => +v.toFixed(2)), actors: actors.map((a) => ({ k: a.kind, h: !!a.isHitman, s: a.state, alive: a.alive, vis: a.root.visible, p: [+a.pos.x.toFixed(1), +a.pos.z.toFixed(1)], label: a.label, susp: a.susp && +a.susp.toFixed(0), rev: !!a.revealed, aggro: !!a.aggro, clip: a.clip, r: a.rigType, st: a.state, hp: Math.round(a.hp) })) }), aimAt: (i) => { const a = actors[i]; if (!a) return; camYaw = Math.atan2(a.pos.x - player.pos.x, a.pos.z - player.pos.z); camPitch = 0.05; }, teleport: (x, z, y = 0) => { player.pos.set(x, y, z); }, give: (k) => { if (k === 'scope') return fitScope(); if (!G.weapons.includes(k)) { G.weapons.push(k); G.ammo[k] = WEAPONS[k].mag; } setWeapon(G.weapons.indexOf(k)); }, ads: (v) => { rmb = v; }, actor: (i) => actors[i], look: (i, yaw, dist, clip, t) => { mode = 'frozen'; const a = actors[i]; if (clip) { a.mixer.stopAllAction(); const ac = a.actions[clip]; ac.reset().play(); ac.time = t; a.mixer.update(0); a.root.updateMatrixWorld(true); } camera.position.set(a.pos.x + Math.sin(a.yaw + yaw) * dist, 1.5, a.pos.z + Math.cos(a.yaw + yaw) * dist); camera.lookAt(a.pos.x, 1.2, a.pos.z); camera.fov = 45; camera.updateProjectionMatrix(); }, setCam: (y, p) => { camYaw = y; camPitch = p; }, spin: (d) => { mode = "frozen"; player.root.rotation.y += d; } };
+window.__regulars = { info: () => ({ mode, dom: G && G.dom, heat: G && G.heat, hp: player && player.hp, pos: player && player.pos.toArray().map((v) => +v.toFixed(2)), actors: actors.map((a) => ({ k: a.kind, h: !!a.isHitman, s: a.state, alive: a.alive, vis: a.root.visible, p: [+a.pos.x.toFixed(1), +a.pos.z.toFixed(1)], label: a.label, susp: a.susp && +a.susp.toFixed(0), rev: !!a.revealed, aggro: !!a.aggro, clip: a.clip, r: a.rigType, st: a.state, hp: Math.round(a.hp) })) }), aimAt: (i) => { const a = actors[i]; if (!a) return; camYaw = Math.atan2(a.pos.x - player.pos.x, a.pos.z - player.pos.z); camPitch = 0.05; }, teleport: (x, z, y = 0) => { player.pos.set(x, y, z); }, give: (k) => { if (k === 'scope') return fitScope(); if (!G.weapons.includes(k)) { G.weapons.push(k); G.ammo[k] = WEAPONS[k].mag; } setWeapon(G.weapons.indexOf(k)); }, ads: (v) => { rmb = v; }, actor: (i) => actors[i], look: (i, yaw, dist, clip, t) => { mode = 'frozen'; const a = actors[i]; if (clip) { a.mixer.stopAllAction(); const ac = a.actions[clip]; ac.reset().play(); ac.time = t; a.mixer.update(0); a.root.updateMatrixWorld(true); } camera.position.set(a.pos.x + Math.sin(a.yaw + yaw) * dist, 1.5, a.pos.z + Math.cos(a.yaw + yaw) * dist); camera.lookAt(a.pos.x, 1.2, a.pos.z); camera.fov = 45; camera.updateProjectionMatrix(); }, audit: () => { const out = []; world.updateMatrixWorld(true); world.traverse((m) => { if (!m.isMesh || !m.geometry || !m.geometry.parameters || m.material === inkMat) return; const pr = m.geometry.parameters; if (!pr.height) return;
+  const bb = new THREE.Box3().setFromObject(m); if (bb.min.y > 0.6 || bb.max.y - bb.min.y < 1.6 || (bb.max.x - bb.min.x) * (bb.max.z - bb.min.z) < 0.3) return;
+  const cx = (bb.min.x + bb.max.x) / 2, cz = (bb.min.z + bb.max.z) / 2; const hit = solids.some((s) => !(s.y0 > 0.5) && s.h > 1 && cx >= s.minX - 0.05 && cx <= s.maxX + 0.05 && cz >= s.minZ - 0.05 && cz <= s.maxZ + 0.05);
+  if (!hit) out.push([+cx.toFixed(1), +cz.toFixed(1), +(bb.max.x - bb.min.x).toFixed(1), +(bb.max.z - bb.min.z).toFixed(1), +bb.max.y.toFixed(1)]); }); return out; }, setCam: (y, p) => { camYaw = y; camPitch = p; }, spin: (d) => { mode = "frozen"; player.root.rotation.y += d; } };
 </script>
